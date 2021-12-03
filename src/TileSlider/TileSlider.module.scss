@@ -1,0 +1,46 @@
+.root {
+  position: relative;
+  overflow: hidden;
+}
+
+.container {
+  display: block;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.tile {
+  display: inline-block;
+  list-style-type: none;
+  white-space: normal;
+  box-sizing: border-box;
+}
+
+.emptyTile {
+  box-sizing: border-box;
+
+  &::before {
+    content: "";
+    display: block;
+    padding-top: 56.25%;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+  }
+}
+
+.leftControl {
+  left: 0px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-100%);
+  z-index: 1;
+}
+
+.rightControl {
+  position: absolute;
+  right: 0px;
+  top: 50%;
+  transform: translateY(-100%);
+}
+

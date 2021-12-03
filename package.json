@@ -1,18 +1,22 @@
 {
-  "name": "tile-dock",
+  "name": "@videodock/tile-slider",
   "version": "0.0.2",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
   "types": "lib/index.d.ts",
   "license": "",
   "scripts": {
-    "build": "rollup -c"
- },
+    "clean": "rimraf lib",
+    "build": "rollup -c",
+    "prepublishOnly": "yarn clean && yarn build"
+  },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^18.0.0",
     "@rollup/plugin-node-resolve": "^11.2.1",
     "@types/react": "^17.0.3",
+    "node-sass": "^6.0.1",
     "postcss": "^8.2.10",
+    "rimraf": "^3.0.2",
     "rollup": "^2.45.2",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-postcss": "^4.0.0",
