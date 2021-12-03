@@ -4,7 +4,7 @@
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
   "types": "lib/index.d.ts",
-  "license": "",
+  "license": "MIT",
   "scripts": {
     "clean": "rimraf lib",
     "build": "rollup -c",
