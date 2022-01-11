@@ -46,7 +46,7 @@ type Tile<T> = {
 /**
  * Make an unique Tile for all the given sliced items.
  */
-const makeTileArray = <T,>(originalList: T[], slicedItems: T[]): Tile<T>[] => {
+const makeTileArray = <T extends unknown>(originalList: T[], slicedItems: T[]): Tile<T>[] => {
   const itemIndices: string[] = [];
 
   return slicedItems.map((item) => {
@@ -77,7 +77,7 @@ const makeTileArray = <T,>(originalList: T[], slicedItems: T[]): Tile<T>[] => {
  *
  * Notice the duplicate tile with index 4.
  */
-const makeTileSlice = <T,>(
+const makeTileSlice = <T extends unknown>(
   items: T[],
   isMultiPage: boolean,
   index: number,
