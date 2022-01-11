@@ -132,15 +132,15 @@ const TileSlider = <T extends unknown>({
   const transformWithOffset: number = isMultiPage
     ? 100 - tileWidth * (tilesToShow + 1) + transform
     : wrapWithEmptyTiles
-    ? -100
-    : 0;
+      ? -100
+      : 0;
   const pages = items.length / tilesToShow;
   const tileList: Tile<T>[] = useMemo(() => {
     return makeTileSlice<T>(items, isMultiPage, index, tilesToShow, cycleMode);
   }, [items, isMultiPage, index, tilesToShow, cycleMode]);
 
   const transitionBasis: string =
-    isMultiPage && animated ? `transform ${transitionTime} ease` : ';
+    isMultiPage && animated ? `transform ${transitionTime} ease` : '';
 
   const needControls: boolean = showControls && isMultiPage;
   const showLeftControl: boolean =
@@ -358,7 +358,7 @@ const TileSlider = <T extends unknown>({
                 width: `${tileWidth}%`,
                 paddingLeft: spacing / 2,
                 paddingRight: spacing / 2,
-                transition: !isInView ? 'opacity .2s ease-in 0s' : ',
+                transition: !isInView ? 'opacity .2s ease-in 0s' : '',
               }}
             >
               {renderTile(tile.item, isInView)}
