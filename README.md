@@ -2,11 +2,10 @@
 
 ## Introduction
 
-`@videodock/tile-slider` is a React component which can be used to create a performant and accessible slider in your React
-application. It dynamically renders the tiles and doesn't render tiles which are not visible. This means you can have a 
-list of thousand tiles and still get a good performing site and animation.
+`@videodock/tile-slider` is a React component which can be used to create a performant and accessible slider for your React
+website. It only renders the visible tiles, meaning that you can have thousands of items and still get a good performing site and animation.
 
-It only needs React... not other dependencies! 
+It only needs React... no other dependencies needed! 
 
 ## Installation
 
