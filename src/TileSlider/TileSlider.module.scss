@@ -1,3 +1,8 @@
+.root {
+  overflow: hidden;
+  position: relative;
+}
+
 .container {
   display: block;
   margin: 0;
@@ -16,7 +21,7 @@
   box-sizing: border-box;
 
   &::before {
-    content: "";
+    content: '';
     display: block;
     padding-top: 56.25%;
     background: rgba(255, 255, 255, 0.12);
@@ -27,7 +32,7 @@
 .leftControl {
   left: 0px;
   position: absolute;
-  top: calc(50% + 25px);
+  top: 50%;
   transform: translateY(-100%);
   z-index: 1;
 }
@@ -35,7 +40,7 @@
 .rightControl {
   position: absolute;
   right: 0px;
-  top: calc(50% + 25px);
+  top: 50%;
   transform: translateY(-100%);
 }
 

@@ -1,6 +1,7 @@
 import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import styles from './TileSlider.module.scss';
+import { clx } from './utils';
 
 export const CYCLE_MODE_STOP = 'stop';
 export const CYCLE_MODE_RESTART = 'restart';
@@ -26,7 +27,7 @@ export type TileSliderProps<T> = {
   animated?: boolean;
   wrapWithEmptyTiles?: boolean;
   transitionTime?: string;
-  rootClassName?: string;
+  className?: string;
   renderTile: (item: T, isInView: boolean) => JSX.Element;
   renderLeftControl?: (props: ControlProps) => JSX.Element;
   renderRightControl?: (props: ControlProps) => JSX.Element;
@@ -43,7 +44,7 @@ type Tile<T> = {
 /**
  * Make a unique Tile for all the given sliced items.
  */
-const makeTileArray = <T extends unknown>(originalList: T[], slicedItems: T[]): Tile<T>[] => {
+export const makeTileArray = <T extends unknown>(originalList: T[], slicedItems: T[]): Tile<T>[] => {
   const itemIndices: string[] = [];
 
   return slicedItems.map((item) => {
@@ -110,7 +111,7 @@ const TileSlider = <T extends unknown>({
   renderRightControl,
   renderPaginationDots,
   renderAriaLabel,
-  rootClassName,
+  className,
 }: TileSliderProps<T>) => {
   const [index, setIndex] = useState<number>(0);
   const [slideToIndex, setSlideToIndex] = useState<number>(0);
@@ -278,7 +279,7 @@ const TileSlider = <T extends unknown>({
   };
 
   return (
-    <div className={rootClassName}>
+    <div className={clx(styles.root, className)}>
       {showLeftControl && !!renderLeftControl && (
         <div className={styles.leftControl}>
           {renderLeftControl({
