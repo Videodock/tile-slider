@@ -1,6 +1,7 @@
 import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import styles from './TileSlider.module.scss';
+import { clx } from './utils';
 
 export const CYCLE_MODE_STOP = 'stop';
 export const CYCLE_MODE_RESTART = 'restart';
@@ -10,7 +11,10 @@ export type CycleMode = 'stop' | 'restart' | 'endless';
 type Direction = 'left' | 'right';
 type Position = { x: number; y: number };
 
-type ControlProps = { onClick: () => void, disabled: boolean };
+type ControlProps = {
+  onClick: () => void;
+  disabled: boolean;
+};
 
 export type TileSliderProps<T> = {
   items: T[];
@@ -23,6 +27,7 @@ export type TileSliderProps<T> = {
   animated?: boolean;
   wrapWithEmptyTiles?: boolean;
   transitionTime?: string;
+  className?: string;
   renderTile: (item: T, isInView: boolean) => JSX.Element;
   renderLeftControl?: (props: ControlProps) => JSX.Element;
   renderRightControl?: (props: ControlProps) => JSX.Element;
@@ -37,9 +42,9 @@ type Tile<T> = {
 };
 
 /**
- * Make an unique Tile for all the given sliced items.
+ * Make a unique Tile for all the given sliced items.
  */
-const makeTileArray = <T, > (originalList: T[], slicedItems: T[]): Tile<T>[] => {
+export const makeTileArray = <T extends unknown>(originalList: T[], slicedItems: T[]): Tile<T>[] => {
   const itemIndices: string[] = [];
 
   return slicedItems.map((item) => {
@@ -55,8 +60,8 @@ const makeTileArray = <T, > (originalList: T[], slicedItems: T[]): Tile<T>[] => 
 };
 
 /**
- * Return an Tile collection which can be rendered in the slider component. This collection can contain duplicates, so
- * we need to make them "unique".
+ * Return a Tile collection which can be rendered in the slider component. This collection can contain duplicates, so
+ * we need to make them 'unique'.
  *
  * In the happy flow, we only have unique tiles to enable wrapping (unlimited scroll):
  *
@@ -70,7 +75,13 @@ const makeTileArray = <T, > (originalList: T[], slicedItems: T[]): Tile<T>[] => 
  *
  * Notice the duplicate tile with index 4.
  */
-const makeTileSlice = <T, > (items: T[], isMultiPage: boolean, index: number, tilesToShow: number, cycleMode: CycleMode): Tile<T>[] => {
+const makeTileSlice = <T extends unknown>(
+  items: T[],
+  isMultiPage: boolean,
+  index: number,
+  tilesToShow: number,
+  cycleMode: CycleMode,
+): Tile<T>[] => {
   if (!isMultiPage) return makeTileArray(items, items);
 
   const sliceFrom: number = index;
@@ -84,25 +95,24 @@ const makeTileSlice = <T, > (items: T[], isMultiPage: boolean, index: number, ti
   return makeTileArray(items, itemsSlice);
 };
 
-const TileSlider = <T extends unknown> (
-  {
-    items,
-    tilesToShow = 6,
-    cycleMode = 'endless',
-    spacing = 12,
-    minimalTouchMovement = 30,
-    showControls = true,
-    animated = !window.matchMedia('(prefers-reduced-motion)').matches,
-    transitionTime = '0.6s',
-    wrapWithEmptyTiles = false,
-    showDots = false,
-    renderTile,
-    renderLeftControl,
-    renderRightControl,
-    renderPaginationDots,
-    renderAriaLabel,
-  }: TileSliderProps<T>
-) => {
+const TileSlider = <T extends unknown>({
+  items,
+  tilesToShow = 6,
+  cycleMode = 'endless',
+  spacing = 12,
+  minimalTouchMovement = 30,
+  showControls = true,
+  animated = !window.matchMedia('(prefers-reduced-motion)').matches,
+  transitionTime = '0.6s',
+  wrapWithEmptyTiles = false,
+  showDots = false,
+  renderTile,
+  renderLeftControl,
+  renderRightControl,
+  renderPaginationDots,
+  renderAriaLabel,
+  className,
+}: TileSliderProps<T>) => {
   const [index, setIndex] = useState<number>(0);
   const [slideToIndex, setSlideToIndex] = useState<number>(0);
   const [transform, setTransform] = useState<number>(-100);
@@ -124,7 +134,7 @@ const TileSlider = <T extends unknown> (
   const showRightControl: boolean = needControls && !(cycleMode === 'stop' && index === items.length - tilesToShow);
 
   /**
-   * Slide all tiles in the given direction. Currently only 'left' or 'right' are supported.
+   * Slide all tiles in the given direction. Currently, only 'left' or 'right' are supported.
    */
   const slide = useCallback(
     (direction: Direction): void => {
@@ -160,7 +170,7 @@ const TileSlider = <T extends unknown> (
         y: event.touches[0].clientY,
       };
 
-      function handleTouchMove (this: HTMLDocument, event: TouchEvent): void {
+      function handleTouchMove(this: HTMLDocument, event: TouchEvent): void {
         const newPosition: Position = {
           x: event.changedTouches[0].clientX,
           y: event.changedTouches[0].clientY,
@@ -174,7 +184,7 @@ const TileSlider = <T extends unknown> (
         }
       }
 
-      function handleTouchEnd (this: HTMLDocument, event: TouchEvent): void {
+      function handleTouchEnd(this: HTMLDocument, event: TouchEvent): void {
         const newPosition = {
           x: event.changedTouches[0].clientX,
           y: event.changedTouches[0].clientY,
@@ -191,17 +201,19 @@ const TileSlider = <T extends unknown> (
         cleanup();
       }
 
-      function handleTouchCancel () {
+      function handleTouchCancel() {
         cleanup();
       }
 
-      function cleanup () {
+      function cleanup() {
         document.removeEventListener('touchmove', handleTouchMove);
         document.removeEventListener('touchend', handleTouchEnd);
         document.removeEventListener('touchcancel', handleTouchCancel);
       }
 
-      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+      document.addEventListener('touchmove', handleTouchMove, {
+        passive: false,
+      });
       document.addEventListener('touchend', handleTouchEnd);
       document.addEventListener('touchcancel', handleTouchCancel);
     },
@@ -249,7 +261,7 @@ const TileSlider = <T extends unknown> (
   };
 
   const leftControlDisabled = (cycleMode === 'stop' && index === 0) || !didSlideBefore;
-  const rightControlDisabled = (cycleMode === 'stop' && index === items.length - tilesToShow);
+  const rightControlDisabled = cycleMode === 'stop' && index === items.length - tilesToShow;
   const slideOffset = index - slideToIndex;
 
   const paginationDots = () => {
@@ -267,10 +279,13 @@ const TileSlider = <T extends unknown> (
   };
 
   return (
-    <div className={styles.root}>
+    <div className={clx(styles.root, className)}>
       {showLeftControl && !!renderLeftControl && (
         <div className={styles.leftControl}>
-          {renderLeftControl({ onClick: () => slide('left'), disabled: leftControlDisabled })}
+          {renderLeftControl({
+            onClick: () => slide('left'),
+            disabled: leftControlDisabled,
+          })}
         </div>
       )}
       <ul ref={frameRef} className={styles.container} style={ulStyle} onTouchStart={handleTouchStart} onTransitionEnd={handleTransitionEnd}>
@@ -316,7 +331,10 @@ const TileSlider = <T extends unknown> (
       </ul>
       {showRightControl && !!renderRightControl && (
         <div className={styles.rightControl}>
-          {renderRightControl({ onClick: () => slide('right'), disabled: rightControlDisabled })}
+          {renderRightControl({
+            onClick: () => slide('right'),
+            disabled: rightControlDisabled,
+          })}
         </div>
       )}
       {paginationDots()}

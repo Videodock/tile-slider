@@ -1,6 +1,6 @@
 .root {
-  position: relative;
   overflow: hidden;
+  position: relative;
 }
 
 .container {
@@ -21,7 +21,7 @@
   box-sizing: border-box;
 
   &::before {
-    content: "";
+    content: '';
     display: block;
     padding-top: 56.25%;
     background: rgba(255, 255, 255, 0.12);
@@ -44,3 +44,10 @@
   transform: translateY(-100%);
 }
 
+.dots {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 12px;
+}
