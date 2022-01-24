@@ -314,7 +314,7 @@ const TileSlider = <T extends unknown>({
                 transition: !isInView ? 'opacity .2s ease-in 0s' : '',
               }}
             >
-              {renderTile(tile.item, isInView)}
+              {renderTile(tile.item, isInView, listIndex)}
             </li>
           );
         })}
