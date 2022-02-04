@@ -28,11 +28,14 @@ export type TileSliderProps<T> = {
   wrapWithEmptyTiles?: boolean;
   transitionTime?: string;
   className?: string;
-  renderTile: (item: T, isInView: boolean) => JSX.Element;
+  renderTile: (item: T, isInView: boolean, index: number) => JSX.Element;
   renderLeftControl?: (props: ControlProps) => JSX.Element;
   renderRightControl?: (props: ControlProps) => JSX.Element;
   renderPaginationDots?: (index: number, pageIndex: number) => JSX.Element;
   renderAriaLabel?: (tile: Tile<T>, total: number) => string;
+  onSwipeStart: () => void;
+  onSwipeEnd: () => void;
+  onSlideEnd: () => void;
 };
 
 type Tile<T> = {
@@ -112,6 +115,9 @@ const TileSlider = <T extends unknown>({
   renderPaginationDots,
   renderAriaLabel,
   className,
+  onSwipeStart,
+  onSwipeEnd,
+  onSlideEnd,
 }: TileSliderProps<T>) => {
   const [index, setIndex] = useState<number>(0);
   const [slideToIndex, setSlideToIndex] = useState<number>(0);
@@ -163,6 +169,8 @@ const TileSlider = <T extends unknown>({
     [animated, cycleMode, index, items.length, tileWidth, tilesToShow],
   );
 
+  const verticalScrollBlockedRef = useRef<boolean>();
+
   const handleTouchStart = useCallback(
     (event: React.TouchEvent): void => {
       const touchPosition: Position = {
@@ -178,9 +186,12 @@ const TileSlider = <T extends unknown>({
         const movementX: number = Math.abs(newPosition.x - touchPosition.x);
         const movementY: number = Math.abs(newPosition.y - touchPosition.y);
 
-        if (movementX > movementY && movementX > 10) {
+        if ((movementX > movementY && movementX > 10) || verticalScrollBlockedRef.current) {
           event.preventDefault();
           event.stopPropagation();
+
+          if (verticalScrollBlockedRef.current) verticalScrollBlockedRef.current = true;
+          if (onSwipeStart) onSwipeStart();
         }
       }
 
@@ -209,6 +220,9 @@ const TileSlider = <T extends unknown>({
         document.removeEventListener('touchmove', handleTouchMove);
         document.removeEventListener('touchend', handleTouchEnd);
         document.removeEventListener('touchcancel', handleTouchCancel);
+
+        if (verticalScrollBlockedRef.current) verticalScrollBlockedRef.current = false;
+        if (onSwipeEnd) onSwipeEnd();
       }
 
       document.addEventListener('touchmove', handleTouchMove, {
@@ -217,7 +231,7 @@ const TileSlider = <T extends unknown>({
       document.addEventListener('touchend', handleTouchEnd);
       document.addEventListener('touchcancel', handleTouchCancel);
     },
-    [minimalTouchMovement, slide],
+    [minimalTouchMovement, slide, onSwipeStart, onSwipeEnd],
   );
 
   useLayoutEffect(() => {
@@ -238,6 +252,7 @@ const TileSlider = <T extends unknown>({
 
       setTimeout(() => {
         if (frameRef.current) frameRef.current.style.transition = transitionBasis;
+        if (onSlideEnd) onSlideEnd();
       }, 0);
       setDoAnimationReset(false);
     };
