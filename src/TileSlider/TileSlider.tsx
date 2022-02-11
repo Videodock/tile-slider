@@ -169,7 +169,7 @@ const TileSlider = <T extends unknown>({
     [animated, cycleMode, index, items.length, tileWidth, tilesToShow],
   );
 
-  const verticalScrollBlockedRef = useRef<boolean>();
+  const verticalScrollBlockedRef = useRef(false);
 
   const handleTouchStart = useCallback(
     (event: React.TouchEvent): void => {
@@ -190,7 +190,7 @@ const TileSlider = <T extends unknown>({
           event.preventDefault();
           event.stopPropagation();
 
-          if (verticalScrollBlockedRef.current) verticalScrollBlockedRef.current = true;
+          verticalScrollBlockedRef.current = true;
           if (onSwipeStart) onSwipeStart();
         }
       }
@@ -221,7 +221,7 @@ const TileSlider = <T extends unknown>({
         document.removeEventListener('touchend', handleTouchEnd);
         document.removeEventListener('touchcancel', handleTouchCancel);
 
-        if (verticalScrollBlockedRef.current) verticalScrollBlockedRef.current = false;
+        verticalScrollBlockedRef.current = false;
         if (onSwipeEnd) onSwipeEnd();
       }
 
@@ -258,7 +258,7 @@ const TileSlider = <T extends unknown>({
     };
 
     if (doAnimationReset) resetAnimation();
-  }, [doAnimationReset, index, items.length, slideToIndex, tileWidth, tilesToShow, transitionBasis]);
+  }, [doAnimationReset, index, items.length, slideToIndex, tileWidth, tilesToShow, transitionBasis, onSlideEnd]);
 
   const handleTransitionEnd = (event: React.TransitionEvent<HTMLUListElement>) => {
     if (event.target === frameRef.current) {
