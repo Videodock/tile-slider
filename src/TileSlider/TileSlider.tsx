@@ -34,9 +34,9 @@ export type TileSliderProps<T> = {
   renderRightControl?: (props: ControlProps) => JSX.Element;
   renderPaginationDots?: (index: number, pageIndex: number) => JSX.Element;
   renderAriaLabel?: (tile: Tile<T>, total: number) => string;
-  onSwipeStart: () => void;
-  onSwipeEnd: () => void;
-  onSlideEnd: () => void;
+  onSwipeStart?: () => void;
+  onSwipeEnd?: () => void;
+  onSlideEnd?: () => void;
 };
 
 type Tile<T> = {
