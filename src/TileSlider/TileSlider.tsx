@@ -27,8 +27,9 @@ export type TileSliderProps<T> = {
   animated?: boolean;
   wrapWithEmptyTiles?: boolean;
   transitionTime?: string;
+  transitionTimingFunction?: string;
   className?: string;
-  renderTile: (item: T, isInView: boolean, index: number) => JSX.Element;
+  renderTile: (item: T, isInView: boolean, listIndex: number) => JSX.Element;
   renderLeftControl?: (props: ControlProps) => JSX.Element;
   renderRightControl?: (props: ControlProps) => JSX.Element;
   renderPaginationDots?: (index: number, pageIndex: number) => JSX.Element;
@@ -107,6 +108,7 @@ const TileSlider = <T extends unknown>({
   showControls = true,
   animated = !window.matchMedia('(prefers-reduced-motion)').matches,
   transitionTime = '0.6s',
+  transitionTimingFunction = 'cubic-bezier(0.39, 0.06, 0.29, 0.96)',
   wrapWithEmptyTiles = false,
   showDots = false,
   renderTile,
@@ -133,7 +135,7 @@ const TileSlider = <T extends unknown>({
     return makeTileSlice<T>(items, isMultiPage, index, tilesToShow, cycleMode);
   }, [items, isMultiPage, index, tilesToShow, cycleMode]);
 
-  const transitionBasis: string = isMultiPage && animated ? `transform ${transitionTime} ease` : '';
+  const transitionBasis: string = isMultiPage && animated ? `transform ${transitionTime} ${transitionTimingFunction}` : '';
 
   const needControls: boolean = showControls && isMultiPage;
   const showLeftControl: boolean = needControls && !(cycleMode === 'stop' && index === 0);
@@ -326,7 +328,7 @@ const TileSlider = <T extends unknown>({
                 width: `${tileWidth}%`,
                 paddingLeft: spacing / 2,
                 paddingRight: spacing / 2,
-                transition: !isInView ? 'opacity .2s ease-in 0s' : '',
+                transition: !isInView ? 'opacity .6s ease-in' : '',
               }}
             >
               {renderTile(tile.item, isInView, listIndex)}
