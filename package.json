@@ -33,7 +33,6 @@
     "eslint-plugin-react-hooks": "^4.2.0",
     "eslint-plugin-rulesdir": "^0.2.0",
     "eslint-watch": "^7.0.0",
-    "node-sass": "^7.0.0",
     "postcss": "^8.2.13",
     "prettier": "^2.3.2",
     "rimraf": "^3.0.2",

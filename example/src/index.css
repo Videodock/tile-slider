@@ -1,0 +1,58 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.example {
+  margin: 64px;
+  max-width: 95vw;
+  overflow: hidden;
+}
+
+.sliderContainer {
+  border: 1px solid rgb(255, 0, 0);
+  margin: 32px 0;
+}
+
+.slider {
+  position: initial;
+  padding: 16px;
+}
+
+.showOutOfView {
+  overflow: visible !important;
+}
+
+.exampleTile {
+  border: 1px solid black;
+  height: 80px;
+}
+
+.outOfView {
+  opacity: 0.5;
+}
+
+.control {
+  border-radius: 100%;
+  padding: 12px;
+  background-color: rgb(60,60,60);
+  color: white;
+  transform: translateY(50%);
+};
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin: 0 5px;
+  border-radius: 50%;
+  transition: all 200ms ease;
+}
+
+.activeDot {
+  color: gray;
+}
