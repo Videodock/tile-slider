@@ -20,13 +20,13 @@
 .emptyTile {
   box-sizing: border-box;
 
-  &::before {
-    content: '';
-    display: block;
-    padding-top: 56.25%;
-    background: rgba(255, 255, 255, 0.12);
-    border-radius: 4px;
-  }
+}
+.emptyTile::before {
+  content: '';
+  display: block;
+  padding-top: 56.25%;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
 }
 
 .leftControl {
@@ -49,5 +49,5 @@
   display: flex;
   justify-content: center;
   width: 100%;
-  margin-top: 12px;
+  margin: 12px;
 }

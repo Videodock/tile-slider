@@ -1,6 +1,6 @@
 import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
-import styles from './TileSlider.module.scss';
+import './TileSlider.css';
 import { clx } from './utils';
 
 export const CYCLE_MODE_STOP = 'stop';
@@ -8,13 +8,16 @@ export const CYCLE_MODE_RESTART = 'restart';
 export const CYCLE_MODE_ENDLESS = 'endless';
 
 export type CycleMode = 'stop' | 'restart' | 'endless';
-type Direction = 'left' | 'right';
-type Position = { x: number; y: number };
+export type RenderTile<T> = (item: T, isInView: boolean, listIndex: number) => JSX.Element;
+export type RenderControl = (props: ControlProps) => JSX.Element;
 
-type ControlProps = {
+export type ControlProps = {
   onClick: () => void;
   disabled: boolean;
 };
+
+type Direction = 'left' | 'right';
+type Position = { x: number; y: number };
 
 export type TileSliderProps<T> = {
   items: T[];
@@ -29,9 +32,9 @@ export type TileSliderProps<T> = {
   transitionTime?: string;
   transitionTimingFunction?: string;
   className?: string;
-  renderTile: (item: T, isInView: boolean, listIndex: number) => JSX.Element;
-  renderLeftControl?: (props: ControlProps) => JSX.Element;
-  renderRightControl?: (props: ControlProps) => JSX.Element;
+  renderTile: RenderTile<T>;
+  renderLeftControl?: RenderControl;
+  renderRightControl?: RenderControl;
   renderPaginationDots?: (index: number, pageIndex: number) => JSX.Element;
   renderAriaLabel?: (tile: Tile<T>, total: number) => string;
   onSwipeStart?: () => void;
@@ -286,9 +289,9 @@ const TileSlider = <T extends unknown>({
       const length = pages;
 
       return (
-        <div className={styles.dots}>
+        <div className={'dots'}>
           {Array.from({ length }, (_, pageIndex) => {
-            return renderPaginationDots(index, pageIndex);
+            return renderPaginationDots(index / tilesToShow, pageIndex);
           })}
         </div>
       );
@@ -296,19 +299,19 @@ const TileSlider = <T extends unknown>({
   };
 
   return (
-    <div className={clx(styles.root, className)}>
+    <div className={clx('root', className)}>
       {showLeftControl && !!renderLeftControl && (
-        <div className={styles.leftControl}>
+        <div className={'leftControl'}>
           {renderLeftControl({
             onClick: () => slide('left'),
             disabled: leftControlDisabled,
           })}
         </div>
       )}
-      <ul ref={frameRef} className={styles.container} style={ulStyle} onTouchStart={handleTouchStart} onTransitionEnd={handleTransitionEnd}>
+      <ul ref={frameRef} className={'container'} style={ulStyle} onTouchStart={handleTouchStart} onTransitionEnd={handleTransitionEnd}>
         {wrapWithEmptyTiles ? (
           <li
-            className={styles.emptyTile}
+            className={'emptyTile'}
             style={{
               width: `${tileWidth}%`,
               paddingLeft: spacing / 2,
@@ -321,7 +324,7 @@ const TileSlider = <T extends unknown>({
 
           return (
             <li
-              className={styles.tile}
+              className={'tile'}
               key={tile.key}
               aria-label={renderAriaLabel && renderAriaLabel(tile, items.length)}
               style={{
@@ -337,7 +340,7 @@ const TileSlider = <T extends unknown>({
         })}
         {wrapWithEmptyTiles ? (
           <li
-            className={styles.emptyTile}
+            className={'emptyTile'}
             style={{
               width: `${tileWidth}%`,
               paddingLeft: spacing / 2,
@@ -347,7 +350,7 @@ const TileSlider = <T extends unknown>({
         ) : null}
       </ul>
       {showRightControl && !!renderRightControl && (
-        <div className={styles.rightControl}>
+        <div className={'rightControl'}>
           {renderRightControl({
             onClick: () => slide('right'),
             disabled: rightControlDisabled,
