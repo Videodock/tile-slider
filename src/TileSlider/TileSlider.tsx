@@ -32,6 +32,7 @@ export type TileSliderProps<T> = {
   transitionTime?: string;
   transitionTimingFunction?: string;
   className?: string;
+  pageStep?: 'page' | 'tile';
   renderTile: RenderTile<T>;
   renderLeftControl?: RenderControl;
   renderRightControl?: RenderControl;
@@ -114,6 +115,7 @@ const TileSlider = <T extends unknown>({
   transitionTimingFunction = 'cubic-bezier(0.39, 0.06, 0.29, 0.96)',
   wrapWithEmptyTiles = false,
   showDots = false,
+  pageStep = 'page',
   renderTile,
   renderLeftControl,
   renderRightControl,
@@ -150,16 +152,17 @@ const TileSlider = <T extends unknown>({
   const slide = useCallback(
     (direction: Direction): void => {
       const directionFactor = direction === 'right' ? 1 : -1;
-      let nextIndex: number = index + tilesToShow * directionFactor;
+      const stepCount = pageStep === 'page' ? tilesToShow : 1;
+      let nextIndex: number = index + stepCount * directionFactor;
 
       if (nextIndex < 0) {
         if (cycleMode === 'stop') nextIndex = 0;
-        if (cycleMode === 'restart') nextIndex = index === 0 ? 0 - tilesToShow : 0;
+        if (cycleMode === 'restart') nextIndex = index === 0 ? 0 - stepCount : 0;
       }
 
-      if (nextIndex > items.length - tilesToShow) {
-        if (cycleMode === 'stop') nextIndex = items.length - tilesToShow;
-        if (cycleMode === 'restart') nextIndex = index >= items.length - tilesToShow ? items.length : items.length - tilesToShow;
+      if (nextIndex > items.length - stepCount) {
+        if (cycleMode === 'stop') nextIndex = items.length - stepCount;
+        if (cycleMode === 'restart') nextIndex = index >= items.length - stepCount ? items.length : items.length - stepCount;
       }
 
       const steps: number = Math.abs(index - nextIndex);
@@ -171,7 +174,7 @@ const TileSlider = <T extends unknown>({
 
       if (!animated) setDoAnimationReset(true);
     },
-    [animated, cycleMode, index, items.length, tileWidth, tilesToShow],
+    [animated, cycleMode, index, items.length, tileWidth, tilesToShow, pageStep],
   );
 
   const verticalScrollBlockedRef = useRef(false);

@@ -95,6 +95,21 @@ const App = () => {
             showDots
           />
         </div>
+        <h2>Page step per tile</h2>
+        <div className="sliderContainer">
+          <TileSlider
+            className="slider"
+            items={items}
+            tilesToShow={5}
+            spacing={16}
+            cycleMode={'restart'}
+            transitionTime={'0.3s'}
+            renderTile={renderTile}
+            renderLeftControl={renderLeftControl}
+            renderRightControl={renderRightControl}
+            pageStep={'tile'}
+          />
+        </div>
       </div>
     </div>
   );
