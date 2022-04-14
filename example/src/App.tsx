@@ -35,7 +35,7 @@ const App = () => {
 
   const renderPaginationDots = useCallback(
     (index: number, pageIndex: number) => (
-      <span key={pageIndex} className={`dot${index === pageIndex ? ', activeDot' : ''}`}>
+      <span key={pageIndex} className={`dot${index === pageIndex ? ' activeDot' : ''}`}>
         &#9679;
       </span>
     ),
@@ -44,55 +44,57 @@ const App = () => {
 
   return (
     <div className="example">
-      <header>
-        <h1>TileSlider</h1>
-      </header>
-      <h2>Basic example</h2>
-      <div className="sliderContainer">
-        <TileSlider
-          className="slider"
-          items={items}
-          tilesToShow={5}
-          spacing={16}
-          cycleMode={'restart'}
-          transitionTime={'0.3s'}
-          showControls={!matchMedia('(hover: none)').matches} // Hide controls on touch devices
-          renderTile={renderTile}
-          renderLeftControl={renderLeftControl}
-          renderRightControl={renderRightControl}
-        />
-      </div>
-      <h2>Show tiles that are out of boundaries transparent</h2>
-      <div className="sliderContainer">
-        <TileSlider
-          className="slider showOutOfView"
-          items={items}
-          tilesToShow={5}
-          spacing={16}
-          cycleMode={'restart'}
-          transitionTime={'0.3s'}
-          showControls={!matchMedia('(hover: none)').matches} // Hide controls on touch devices
-          renderTile={renderTile}
-          renderLeftControl={renderLeftControl}
-          renderRightControl={renderRightControl}
-        />
-      </div>
-      <h2>Show pagination dots</h2>
-      <div className="sliderContainer">
-        <TileSlider
-          className="slider showOutOfView"
-          items={items}
-          tilesToShow={5}
-          spacing={16}
-          cycleMode={'restart'}
-          transitionTime={'0.3s'}
-          showControls={!matchMedia('(hover: none)').matches} // Hide controls on touch devices
-          renderPaginationDots={renderPaginationDots}
-          renderTile={renderTile}
-          renderLeftControl={renderLeftControl}
-          renderRightControl={renderRightControl}
-          showDots
-        />
+      <div className="exampleMargin">
+        <header>
+          <h1>TileSlider</h1>
+        </header>
+        <h2>Basic example</h2>
+        <div className="sliderContainer">
+          <TileSlider
+            className="slider"
+            items={items}
+            tilesToShow={5}
+            spacing={16}
+            cycleMode={'restart'}
+            transitionTime={'0.3s'}
+            showControls={!matchMedia('(hover: none)').matches} // Hide controls on touch devices
+            renderTile={renderTile}
+            renderLeftControl={renderLeftControl}
+            renderRightControl={renderRightControl}
+          />
+        </div>
+        <h2>Show out of boundary tiles transparent</h2>
+        <div className="sliderContainer">
+          <TileSlider
+            className="slider showOutOfView"
+            items={items}
+            tilesToShow={5}
+            spacing={16}
+            cycleMode={'restart'}
+            transitionTime={'0.3s'}
+            showControls={!matchMedia('(hover: none)').matches} // Hide controls on touch devices
+            renderTile={renderTile}
+            renderLeftControl={renderLeftControl}
+            renderRightControl={renderRightControl}
+          />
+        </div>
+        <h2>Pagination dots</h2>
+        <div className="sliderContainer">
+          <TileSlider
+            className="slider"
+            items={items}
+            tilesToShow={5}
+            spacing={16}
+            cycleMode={'restart'}
+            transitionTime={'0.3s'}
+            showControls={!matchMedia('(hover: none)').matches} // Hide controls on touch devices
+            renderPaginationDots={renderPaginationDots}
+            renderTile={renderTile}
+            renderLeftControl={renderLeftControl}
+            renderRightControl={renderRightControl}
+            showDots
+          />
+        </div>
       </div>
     </div>
   );

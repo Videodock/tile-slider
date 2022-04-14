@@ -8,9 +8,11 @@ body {
 }
 
 .example {
-  margin: 64px;
   max-width: 95vw;
   overflow: hidden;
+}
+.exampleMargin {
+  padding: 64px;
 }
 
 .sliderContainer {
