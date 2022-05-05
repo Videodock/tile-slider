@@ -112,7 +112,9 @@ const TileSlider = <T extends unknown>({
    * Slide all tiles in the given direction. Currently, only 'left' or 'right' are supported.
    */
   const slide = useCallback(
-    (direction: Direction): void => {
+    (direction: Direction): boolean => {
+      if (!isMultiPage) return false;
+
       const directionFactor = direction === 'right' ? 1 : -1;
       const stepCount = pageStep === 'page' ? tilesToShow : 1;
 
@@ -136,8 +138,9 @@ const TileSlider = <T extends unknown>({
       setDidSlideBefore(true);
 
       if (!animated) setDoAnimationReset(true);
+      return true;
     },
-    [animated, cycleMode, index, items.length, tileWidth, tilesToShow, pageStep],
+    [animated, cycleMode, index, items.length, tileWidth, tilesToShow, pageStep, isMultiPage],
   );
 
   const verticalScrollBlockedRef = useRef(false);
@@ -281,13 +284,6 @@ const TileSlider = <T extends unknown>({
       const isInView = !isMultiPage || (i > firstInView && i <= lastInView);
       const item = getCircularIndex(i, items);
       const key = getCircularIndex(i, renderIdsArr);
-
-      const layout = {
-        isFirstInView: firstInView === i,
-        isLastInView: lastInView === i,
-        isLeftOverscan: i < tilesToShow,
-        isRightOverscan: i > tilesToShow * 2,
-      };
 
       tiles.push(
         <li
