@@ -112,8 +112,8 @@ const TileSlider = <T extends unknown>({
    * Slide all tiles in the given direction. Currently, only 'left' or 'right' are supported.
    */
   const slide = useCallback(
-    (direction: Direction): boolean => {
-      if (!isMultiPage) return false;
+    (direction: Direction): void => {
+      if (!isMultiPage) return;
 
       const directionFactor = direction === 'right' ? 1 : -1;
       const stepCount = pageStep === 'page' ? tilesToShow : 1;
@@ -138,7 +138,6 @@ const TileSlider = <T extends unknown>({
       setDidSlideBefore(true);
 
       if (!animated) setDoAnimationReset(true);
-      return true;
     },
     [animated, cycleMode, index, items.length, tileWidth, tilesToShow, pageStep, isMultiPage],
   );
