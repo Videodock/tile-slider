@@ -254,15 +254,16 @@ const TileSlider = React.forwardRef(
     };
 
     const ulStyle = {
-      transform: `translate3d(${transform}%, 0, 0)`,
+      transform: `translateX(${transform}%)`,
       // prettier-ignore
-      'WebkitTransform': `translate3d(${transform}%, 0, 0)`,
+      'WebkitTransform': `translateX(${transform}%)`,
       left: `${leftOffset}%`,
       position: 'relative',
       width: '100%',
       transition: transitionBasis,
       marginLeft: -spacing / 2,
       marginRight: -spacing / 2,
+      'will-change': 'transform',
     } as React.CSSProperties;
 
     const leftControlDisabled = (cycleMode === 'stop' && index === 0) || !didSlideBefore;
