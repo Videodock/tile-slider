@@ -1,4 +1,4 @@
-/// <reference types="react" />
+import React from 'react';
 import './TileSlider.css';
 export declare const CYCLE_MODE_STOP = "stop";
 export declare const CYCLE_MODE_RESTART = "restart";
@@ -40,5 +40,5 @@ declare type Tile<T> = {
     key: string;
     index: number;
 };
-declare const TileSlider: <T extends unknown>({ items, tilesToShow, cycleMode, spacing, minimalTouchMovement, showControls, animated, transitionTime, transitionTimingFunction, wrapWithEmptyTiles, showDots, pageStep, renderTile, renderLeftControl, renderRightControl, renderPaginationDots, renderAriaLabel, className, onSwipeStart, onSwipeEnd, onSlideEnd, }: TileSliderProps<T>) => JSX.Element;
+declare const TileSlider: React.ForwardRefExoticComponent<TileSliderProps<unknown> & React.RefAttributes<unknown>>;
 export default TileSlider;

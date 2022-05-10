@@ -8,7 +8,7 @@ type Tile = {
 };
 
 const App = () => {
-  const items: Tile[] = Array.from({ length: 25 }, (_, index) => ({ title: `Tile ${index}` }));
+  const items: Tile[] = Array.from({ length: 5 }, (_, index) => ({ title: `Tile ${index}` }));
 
   const renderTile: RenderTile<Tile> = useCallback(
     (item, isInView) => <div className={`exampleTile ${!isInView ? 'outOfView' : ''}`}>{item.title}</div>,
