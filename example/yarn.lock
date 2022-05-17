@@ -253,6 +253,13 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
+"@noriginmedia/norigin-spatial-navigation@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@noriginmedia/norigin-spatial-navigation/-/norigin-spatial-navigation-1.0.4.tgz#54500d549a43317b096bed50a353f7da1575d5ee"
+  integrity sha512-QQI/07jshaGv9wFE4Z7MRbcgywLeVwF5v3ETCrUiE9IplgLycGGBkru2H6FPJmtYykCIsPSYYVhgz210Xoe5Pw==
+  dependencies:
+    lodash "^4.17.21"
+
 "@rollup/pluginutils@^4.2.0":
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/@rollup/pluginutils/-/pluginutils-4.2.0.tgz#a14bbd058fdbba0a5647143b16ed0d86fb60bd08"
@@ -532,6 +539,11 @@ json5@^2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/json5/-/json5-2.2.1.tgz#655d50ed1e6f95ad1a3caababd2b0efda10b395c"
   integrity sha512-1hqLFMSrGHRHxav9q9gNjJ5EXznIxGVO09xQRrwplcS8qs28pZ8s8hupZAmqDwZUmVZ2Qb2jnyPOWcDH8m8dlA==
+
+lodash@^4.17.21:
+  version "4.17.21"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
+  integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
 
 loose-envify@^1.1.0:
   version "1.4.0"

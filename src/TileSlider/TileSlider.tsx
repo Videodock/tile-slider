@@ -1,4 +1,4 @@
-import React, { useCallback, useImperativeHandle, useLayoutEffect, useMemo, useRef, useEffect, useState } from 'react';
+import React, { useCallback, useRef, useEffect, useState } from 'react';
 
 import './TileSlider.css';
 import { clx } from './utils';
@@ -13,7 +13,7 @@ export type RenderTile<T> = (
   isInView: boolean,
   listIndex: number,
   renderKey: string,
-  slide: (direction: Direction) => void,
+  slide?: (direction: Direction) => void,
 ) => JSX.Element;
 export type RenderControl = (props: ControlProps) => JSX.Element;
 
@@ -44,323 +44,319 @@ export type TileSliderProps<T> = {
   renderRightControl?: RenderControl;
   passiveEventlistener?: boolean;
   renderPaginationDots?: (index: number, pageIndex: number) => JSX.Element;
-  renderAriaLabel?: (tile: Tile<T>, total: number) => string;
+  renderAriaLabel?: (item: T, index: number, key: string, total: number) => string;
   onSwipeStart?: () => void;
   onSwipeEnd?: () => void;
   onSlideEnd?: () => void;
+  overscan?: number;
 };
 
-type Tile<T> = {
-  item: T;
-  key: string;
-  index: number;
-};
+const getCircularIndex = (index: number, length: number) => ((index % length) + length) % length;
 
-const getCircularIndex = <T,>(index: number, array: T[]) => {
-  const { length } = array;
-  return array[((index % length) + length) % length];
-};
+const TileSlider = <T extends unknown>({
+  items,
+  tilesToShow = 6,
+  cycleMode = 'endless',
+  spacing = 12,
+  minimalTouchMovement = 30,
+  showControls = true,
+  animated = !window.matchMedia('(prefers-reduced-motion)').matches,
+  transitionTime = '0.6s',
+  transitionTimingFunction = 'cubic-bezier(0.39, 0.06, 0.29, 0.96)',
+  wrapWithEmptyTiles = false,
+  showDots = false,
+  pageStep = 'page',
+  renderTile,
+  renderLeftControl,
+  renderRightControl,
+  renderPaginationDots,
+  renderAriaLabel,
+  className,
+  onSwipeStart,
+  onSwipeEnd,
+  onSlideEnd,
+  overscan = tilesToShow,
+}: TileSliderProps<T>) => {
+  const frameRef = useRef<HTMLUListElement>() as React.MutableRefObject<HTMLUListElement>;
+  const [state, setState] = useState({
+    index: 0,
+    slideToIndex: 0,
+    transform: 0,
+    inTransition: false,
+    slideBefore: false,
+    afterReset: false,
+  });
+  const tileWidth: number = 100 / tilesToShow;
+  const isMultiPage: boolean = items?.length > tilesToShow;
+  const leftOffset: number = isMultiPage ? 100 - tileWidth * (tilesToShow + 1) + -100 : wrapWithEmptyTiles ? -100 : 0;
+  const pages = items.length / tilesToShow;
+  const transitionBasis: string = isMultiPage && animated ? `transform ${transitionTime} ${transitionTimingFunction}` : '';
+  const needControls: boolean = showControls && isMultiPage;
+  const showLeftControl: boolean = needControls && !(cycleMode === 'stop' && state.index === 0);
+  const showRightControl: boolean = needControls && !(cycleMode === 'stop' && state.index === items.length - tilesToShow);
+  const renderCount = isMultiPage ? tilesToShow + overscan * (pageStep === 'tile' ? 1 : 2) : tilesToShow;
 
-const TileSlider = React.forwardRef(
-  <T extends unknown>(
-    {
-      items,
-      tilesToShow = 6,
-      cycleMode = 'endless',
-      spacing = 12,
-      minimalTouchMovement = 30,
-      showControls = true,
-      animated = !window.matchMedia('(prefers-reduced-motion)').matches,
-      transitionTime = '0.6s',
-      transitionTimingFunction = 'cubic-bezier(0.39, 0.06, 0.29, 0.96)',
-      wrapWithEmptyTiles = false,
-      showDots = false,
-      pageStep = 'page',
-      renderTile,
-      renderLeftControl,
-      renderRightControl,
-      renderPaginationDots,
-      renderAriaLabel,
-      className,
-      onSwipeStart,
-      onSwipeEnd,
-      onSlideEnd,
-    }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    TileSliderProps<T>,
-    ref: any,
-  ) => {
-    const [index, setIndex] = useState<number>(0);
-    const [slideToIndex, setSlideToIndex] = useState<number>(0);
-    const [transform, setTransform] = useState<number>(0);
-    const [doAnimationReset, setDoAnimationReset] = useState<boolean>(false);
-    const [didSlideBefore, setDidSlideBefore] = useState(false);
-    const [afterReset, setAfterReset] = useState(false);
-    const frameRef = useRef<HTMLUListElement>() as React.MutableRefObject<HTMLUListElement>;
-    const tileWidth: number = 100 / tilesToShow;
-    const isMultiPage: boolean = items?.length > tilesToShow;
-    const leftOffset: number = isMultiPage ? 100 - tileWidth * (tilesToShow + 1) + -100 : wrapWithEmptyTiles ? -100 : 0;
-    const pages = items.length / tilesToShow;
+  /**
+   * Slide all tiles in the given direction. Currently, only 'left' or 'right' are supported.
+   */
+  const slide = useCallback(
+    (direction: Direction): boolean => {
+      if (state.inTransition) return false;
 
-    const transitionBasis: string = isMultiPage && animated ? `transform ${transitionTime} ${transitionTimingFunction}` : '';
+      const directionFactor = direction === 'right' ? 1 : -1;
+      const stepCount = pageStep === 'page' ? tilesToShow : 1;
 
-    const needControls: boolean = showControls && isMultiPage;
-    const showLeftControl: boolean = needControls && !(cycleMode === 'stop' && index === 0);
-    const showRightControl: boolean = needControls && !(cycleMode === 'stop' && index === items.length - tilesToShow);
+      let nextIndex: number = state.index + stepCount * directionFactor;
 
-    const renderCount = isMultiPage ? tilesToShow * 3 : tilesToShow;
-    const renderIdsArr = useMemo(
-      () => Array.from({ length: isMultiPage ? renderCount + 1 : renderCount }, (_, i) => i),
-      [renderCount, isMultiPage],
-    );
+      if (nextIndex < 0) {
+        if (cycleMode === 'stop') nextIndex = 0;
+        if (cycleMode === 'restart') nextIndex = state.index === 0 ? 0 - stepCount : 0;
+      }
 
-    useImperativeHandle(ref, () => ({
-      slideRight: () => slide('right'),
-      slideLeft: () => slide('left'),
-    }));
+      if (nextIndex > items.length - stepCount) {
+        if (cycleMode === 'stop') nextIndex = items.length - stepCount;
+        if (cycleMode === 'restart') nextIndex = state.index >= items.length - stepCount ? items.length : items.length - stepCount;
+      }
 
-    /**
-     * Slide all tiles in the given direction. Currently, only 'left' or 'right' are supported.
-     */
-    const slide = useCallback(
-      (direction: Direction): void => {
-        if (!isMultiPage) return;
+      const steps: number = Math.abs(state.index - nextIndex);
+      const movement: number = steps * tileWidth * (0 - directionFactor);
 
-        const directionFactor = direction === 'right' ? 1 : -1;
-        const stepCount = pageStep === 'page' ? tilesToShow : 1;
+      setState((state) => ({
+        ...state,
+        slideToIndex: nextIndex,
+        transform: movement,
+        inTransition: true,
+        slideBefore: true,
+      }));
 
-        let nextIndex: number = index + stepCount * directionFactor;
+      if (!animated && frameRef.current) {
+        const event = new TransitionEvent('transitionend', { bubbles: true });
+        setTimeout(() => frameRef.current.dispatchEvent(event), 0);
+      }
 
-        if (nextIndex < 0) {
-          if (cycleMode === 'stop') nextIndex = 0;
-          if (cycleMode === 'restart') nextIndex = index === 0 ? 0 - stepCount : 0;
-        }
+      return true;
+    },
+    [state.inTransition, state.index, pageStep, tilesToShow, items.length, tileWidth, cycleMode, animated],
+  );
 
-        if (nextIndex > items.length - stepCount) {
-          if (cycleMode === 'stop') nextIndex = items.length - stepCount;
-          if (cycleMode === 'restart') nextIndex = index >= items.length - stepCount ? items.length : items.length - stepCount;
-        }
+  const verticalScrollBlockedRef = useRef(false);
 
-        const steps: number = Math.abs(index - nextIndex);
-        const movement: number = steps * tileWidth * (0 - directionFactor);
-
-        setSlideToIndex(nextIndex);
-        setTransform(movement);
-        setDidSlideBefore(true);
-
-        if (!animated) setDoAnimationReset(true);
-      },
-      [animated, cycleMode, index, items.length, tileWidth, tilesToShow, pageStep, isMultiPage],
-    );
-
-    const verticalScrollBlockedRef = useRef(false);
-
-    const handleTouchStart = useCallback(
-      (event: React.TouchEvent): void => {
-        const touchPosition: Position = {
-          x: event.touches[0].clientX,
-          y: event.touches[0].clientY,
-        };
-
-        function handleTouchMove(this: HTMLDocument, event: TouchEvent): void {
-          const newPosition: Position = {
-            x: event.changedTouches[0].clientX,
-            y: event.changedTouches[0].clientY,
-          };
-          const movementX: number = Math.abs(newPosition.x - touchPosition.x);
-          const movementY: number = Math.abs(newPosition.y - touchPosition.y);
-
-          if ((movementX > movementY && movementX > 10) || verticalScrollBlockedRef.current) {
-            event.preventDefault();
-            event.stopPropagation();
-
-            verticalScrollBlockedRef.current = true;
-            if (onSwipeStart) onSwipeStart();
-          }
-        }
-
-        function handleTouchEnd(this: HTMLDocument, event: TouchEvent): void {
-          const newPosition = {
-            x: event.changedTouches[0].clientX,
-            y: event.changedTouches[0].clientY,
-          };
-
-          const movementX: number = Math.abs(newPosition.x - touchPosition.x);
-          const movementY: number = Math.abs(newPosition.y - touchPosition.y);
-          const direction: Direction = newPosition.x < touchPosition.x ? 'right' : 'left';
-
-          if (movementX > minimalTouchMovement && movementX > movementY) {
-            slide(direction);
-          }
-
-          cleanup();
-        }
-
-        function handleTouchCancel() {
-          cleanup();
-        }
-
-        function cleanup() {
-          document.removeEventListener('touchmove', handleTouchMove);
-          document.removeEventListener('touchend', handleTouchEnd);
-          document.removeEventListener('touchcancel', handleTouchCancel);
-
-          verticalScrollBlockedRef.current = false;
-          if (onSwipeEnd) onSwipeEnd();
-        }
-
-        document.addEventListener('touchmove', handleTouchMove, {
-          passive: false,
-        });
-        document.addEventListener('touchend', handleTouchEnd);
-        document.addEventListener('touchcancel', handleTouchCancel);
-      },
-      [minimalTouchMovement, slide, onSwipeStart, onSwipeEnd],
-    );
-
-    useLayoutEffect(() => {
-      const resetAnimation = (): void => {
-        const resetIndex: number = slideToIndex;
-
-        // resetIndex = resetIndex >= items.length ? slideToIndex - items.length : resetIndex;
-        // resetIndex = resetIndex < 0 ? items.length + slideToIndex : resetIndex;
-
-        // if (resetIndex !== slideToIndex) {
-        //   setSlideToIndex(resetIndex);
-        // }
-
-        setIndex(resetIndex);
-
-        if (frameRef.current) frameRef.current.style.transition = 'none';
-        setTransform(0);
-        setDoAnimationReset(false);
-        setAfterReset(true);
+  const handleTouchStart = useCallback(
+    (event: React.TouchEvent): void => {
+      const touchPosition: Position = {
+        x: event.touches[0].clientX,
+        y: event.touches[0].clientY,
       };
 
-      if (doAnimationReset) resetAnimation();
-    }, [doAnimationReset, index, items.length, slideToIndex, tileWidth, tilesToShow, transitionBasis, onSlideEnd]);
+      function handleTouchMove(this: HTMLDocument, event: TouchEvent): void {
+        const newPosition: Position = {
+          x: event.changedTouches[0].clientX,
+          y: event.changedTouches[0].clientY,
+        };
+        const movementX: number = Math.abs(newPosition.x - touchPosition.x);
+        const movementY: number = Math.abs(newPosition.y - touchPosition.y);
 
-    useEffect(() => {
-      if (afterReset) {
-        if (frameRef.current) frameRef.current.style.transition = transitionBasis;
-        if (onSlideEnd) onSlideEnd();
-        setAfterReset(false);
+        if ((movementX > movementY && movementX > 10) || verticalScrollBlockedRef.current) {
+          event.preventDefault();
+          event.stopPropagation();
+
+          verticalScrollBlockedRef.current = true;
+          if (onSwipeStart) onSwipeStart();
+        }
       }
-    }, [afterReset, onSlideEnd, transitionBasis]);
 
-    const handleTransitionEnd = (event: React.TransitionEvent<HTMLUListElement>) => {
-      if (event.target === frameRef.current) {
-        setDoAnimationReset(true);
+      function handleTouchEnd(this: HTMLDocument, event: TouchEvent): void {
+        const newPosition = {
+          x: event.changedTouches[0].clientX,
+          y: event.changedTouches[0].clientY,
+        };
+
+        const movementX: number = Math.abs(newPosition.x - touchPosition.x);
+        const movementY: number = Math.abs(newPosition.y - touchPosition.y);
+        const direction: Direction = newPosition.x < touchPosition.x ? 'right' : 'left';
+
+        if (movementX > minimalTouchMovement && movementX > movementY) {
+          slide(direction);
+        }
+
+        cleanup();
       }
-    };
 
-    const ulStyle = {
-      transform: `translateX(${transform}%)`,
-      // prettier-ignore
-      'WebkitTransform': `translateX(${transform}%)`,
-      left: `${leftOffset}%`,
-      position: 'relative',
-      width: '100%',
-      transition: transitionBasis,
-      marginLeft: -spacing / 2,
-      marginRight: -spacing / 2,
-      'will-change': 'transform',
-    } as React.CSSProperties;
-
-    const leftControlDisabled = (cycleMode === 'stop' && index === 0) || !didSlideBefore;
-    const rightControlDisabled = cycleMode === 'stop' && index === items.length - tilesToShow;
-
-    const paginationDots = () => {
-      if (showDots && isMultiPage && !!renderPaginationDots) {
-        const length = pages;
-
-        return (
-          <div className={'dots'}>
-            {Array.from({ length }, (_, pageIndex) => {
-              return renderPaginationDots(index / tilesToShow, pageIndex);
-            })}
-          </div>
-        );
+      function handleTouchCancel() {
+        cleanup();
       }
-    };
 
-    const renderTiles = () => {
-      const tiles = [];
-      const start = index;
-      const end = renderCount + index;
-      const firstInView = slideToIndex + tilesToShow;
-      const lastInView = tilesToShow * 2 + slideToIndex;
+      function cleanup() {
+        document.removeEventListener('touchmove', handleTouchMove);
+        document.removeEventListener('touchend', handleTouchEnd);
+        document.removeEventListener('touchcancel', handleTouchCancel);
 
-      for (let i = start; i < end; i++) {
-        const isInView = !isMultiPage || (i > firstInView && i <= lastInView);
-        const item = getCircularIndex(i, items);
-        const key = getCircularIndex(i, renderIdsArr);
+        verticalScrollBlockedRef.current = false;
+        if (onSwipeEnd) onSwipeEnd();
+      }
 
-        tiles.push(
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+      document.addEventListener('touchend', handleTouchEnd);
+      document.addEventListener('touchcancel', handleTouchCancel);
+    },
+    [minimalTouchMovement, slide, onSwipeStart, onSwipeEnd],
+  );
+
+  useEffect(() => {
+    if (state.afterReset) {
+      if (frameRef.current) frameRef.current.style.transition = transitionBasis;
+      if (onSlideEnd) onSlideEnd();
+
+      setState((state) => ({
+        ...state,
+        afterReset: false,
+        inTransition: false,
+      }));
+    }
+  }, [onSlideEnd, state.afterReset, transitionBasis]);
+
+  const resetAnimation = (): void => {
+    let resetIndex: number = state.slideToIndex;
+
+    if (cycleMode !== CYCLE_MODE_ENDLESS) {
+      resetIndex = resetIndex >= items.length ? state.slideToIndex - items.length : resetIndex;
+      resetIndex = resetIndex < 0 ? items.length + state.slideToIndex : resetIndex;
+
+      if (resetIndex !== state.slideToIndex) {
+        setState((state) => ({
+          ...state,
+          slideToIndex: resetIndex,
+        }));
+      }
+    }
+
+    if (frameRef.current) frameRef.current.style.transition = 'none';
+
+    setState((state) => ({
+      ...state,
+      index: resetIndex,
+      transform: 0,
+      inTransition: true,
+      slideBefore: true,
+      afterReset: true,
+    }));
+  };
+
+  const handleTransitionEnd = (event: React.TransitionEvent<HTMLUListElement>) => {
+    if (event.target === frameRef.current) {
+      resetAnimation();
+    }
+  };
+
+  const ulStyle = {
+    transform: `translateX(${state.transform}%)`,
+    // prettier-ignore
+    'WebkitTransform': `translateX(${state.transform}%)`,
+    left: `${leftOffset}%`,
+    position: 'relative',
+    width: '100%',
+    transition: transitionBasis,
+    marginLeft: -spacing / 2,
+    marginRight: -spacing / 2,
+    willChange: 'transform',
+  } as React.CSSProperties;
+
+  const leftControlDisabled = (cycleMode === 'stop' && state.index === 0) || !state.slideBefore;
+  const rightControlDisabled = cycleMode === 'stop' && state.index === items.length - tilesToShow;
+
+  const paginationDots = () => {
+    if (showDots && isMultiPage && !!renderPaginationDots) {
+      const length = pages;
+
+      return (
+        <div className={'dots'}>
+          {Array.from({ length }, (_, pageIndex) => {
+            return renderPaginationDots(state.index / tilesToShow, pageIndex);
+          })}
+        </div>
+      );
+    }
+  };
+
+  const renderTiles = () => {
+    const tiles = [];
+    const end = renderCount + state.index;
+    const firstInView = state.slideToIndex + tilesToShow;
+    const lastInView = tilesToShow * 2 + state.slideToIndex;
+    const slideCallback = isMultiPage ? slide : undefined;
+
+    for (let renderIndex = state.index; renderIndex < end; renderIndex++) {
+      const isInView = !isMultiPage || (renderIndex > firstInView && renderIndex <= lastInView);
+      const circularIndex = getCircularIndex(renderIndex, renderCount);
+      const item = items[getCircularIndex(renderIndex, items.length)];
+      const key = `tile_${circularIndex}`;
+      const indexOfItem = renderIndex - state.index;
+
+      tiles.push(
+        <li
+          className={'tile'}
+          key={key}
+          aria-label={renderAriaLabel && renderAriaLabel(item, indexOfItem, key, items.length)}
+          style={{
+            width: `${tileWidth}%`,
+            paddingLeft: spacing / 2,
+            paddingRight: spacing / 2,
+            transition: !isInView ? 'opacity .6s ease-in' : '',
+          }}
+        >
+          {renderTile(item, isInView, renderIndex, key, slideCallback)}
+        </li>,
+      );
+    }
+
+    return tiles;
+  };
+
+  return (
+    <div className={clx('root', className)}>
+      {showLeftControl && !!renderLeftControl && (
+        <div className={'leftControl'}>
+          {renderLeftControl({
+            onClick: () => slide('left'),
+            disabled: leftControlDisabled,
+          })}
+        </div>
+      )}
+      <ul ref={frameRef} className={'container'} style={ulStyle} onTouchStart={handleTouchStart} onTransitionEnd={handleTransitionEnd}>
+        {wrapWithEmptyTiles ? (
           <li
-            className={'tile'}
-            key={key}
-            // aria-label={renderAriaLabel && renderAriaLabel(tile, items.length)}
+            className={'emptyTile'}
             style={{
               width: `${tileWidth}%`,
               paddingLeft: spacing / 2,
               paddingRight: spacing / 2,
-              transition: !isInView ? 'opacity .6s ease-in' : '',
             }}
-          >
-            {renderTile(item, isInView, i, key.toString(), slide)}
-          </li>,
-        );
-      }
+          />
+        ) : null}
 
-      return tiles;
-    };
-
-    return (
-      <div className={clx('root', className)}>
-        {showLeftControl && !!renderLeftControl && (
-          <div className={'leftControl'}>
-            {renderLeftControl({
-              onClick: () => slide('left'),
-              disabled: leftControlDisabled,
-            })}
-          </div>
-        )}
-        <ul ref={frameRef} className={'container'} style={ulStyle} onTouchStart={handleTouchStart} onTransitionEnd={handleTransitionEnd}>
-          {wrapWithEmptyTiles ? (
-            <li
-              className={'emptyTile'}
-              style={{
-                width: `${tileWidth}%`,
-                paddingLeft: spacing / 2,
-                paddingRight: spacing / 2,
-              }}
-            />
-          ) : null}
-
-          {renderTiles()}
-          {wrapWithEmptyTiles ? (
-            <li
-              className={'emptyTile'}
-              style={{
-                width: `${tileWidth}%`,
-                paddingLeft: spacing / 2,
-                paddingRight: spacing / 2,
-              }}
-            />
-          ) : null}
-        </ul>
-        {showRightControl && !!renderRightControl && (
-          <div className={'rightControl'}>
-            {renderRightControl({
-              onClick: () => slide('right'),
-              disabled: rightControlDisabled,
-            })}
-          </div>
-        )}
-        {paginationDots()}
-      </div>
-    );
-  },
-);
+        {renderTiles()}
+        {wrapWithEmptyTiles ? (
+          <li
+            className={'emptyTile'}
+            style={{
+              width: `${tileWidth}%`,
+              paddingLeft: spacing / 2,
+              paddingRight: spacing / 2,
+            }}
+          />
+        ) : null}
+      </ul>
+      {showRightControl && !!renderRightControl && (
+        <div className={'rightControl'}>
+          {renderRightControl({
+            onClick: () => slide('right'),
+            disabled: rightControlDisabled,
+          })}
+        </div>
+      )}
+      {paginationDots()}
+    </div>
+  );
+};
 
 export default TileSlider;
