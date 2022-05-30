@@ -278,15 +278,34 @@ const TileSlider = <T extends unknown>({
     }
   };
 
-  const renderTiles = () => {
+  const renderSinglePageTiles = () =>
+    items.map((item, index) => {
+      const key = `tile_${index}`;
+
+      return (
+        <li
+          className={'tile'}
+          key={key}
+          aria-label={renderAriaLabel && renderAriaLabel(item, index, key, items.length)}
+          style={{
+            width: `${tileWidth}%`,
+            paddingLeft: spacing / 2,
+            paddingRight: spacing / 2,
+          }}
+        >
+          {renderTile(item, true, index, key, undefined)}
+        </li>
+      );
+    });
+
+  const renderMultiPageTiles = () => {
     const tiles = [];
     const end = renderCount + state.index;
     const firstInView = state.slideToIndex + tilesToShow;
     const lastInView = tilesToShow * 2 + state.slideToIndex;
-    const slideCallback = isMultiPage ? slide : undefined;
 
     for (let renderIndex = state.index; renderIndex < end; renderIndex++) {
-      const isInView = !isMultiPage || (renderIndex > firstInView && renderIndex <= lastInView);
+      const isInView = renderIndex > firstInView && renderIndex <= lastInView;
 
       const circularIndex = getCircularIndex(renderIndex, renderCount);
       const indexOfItem = getCircularIndex(renderIndex, items.length);
@@ -306,7 +325,7 @@ const TileSlider = <T extends unknown>({
             transition: !isInView ? 'opacity .6s ease-in' : '',
           }}
         >
-          {renderTile(item, isInView, renderIndex, key, slideCallback)}
+          {renderTile(item, isInView, renderIndex, key, slide)}
         </li>,
       );
     }
@@ -324,7 +343,13 @@ const TileSlider = <T extends unknown>({
           })}
         </div>
       )}
-      <ul ref={frameRef} className={'container'} style={ulStyle} onTouchStart={handleTouchStart} onTransitionEnd={handleTransitionEnd}>
+      <ul
+        ref={frameRef}
+        className={'container'}
+        style={ulStyle}
+        onTouchStart={isMultiPage ? handleTouchStart : undefined}
+        onTransitionEnd={handleTransitionEnd}
+      >
         {wrapWithEmptyTiles ? (
           <li
             className={'emptyTile'}
@@ -335,8 +360,7 @@ const TileSlider = <T extends unknown>({
             }}
           />
         ) : null}
-
-        {renderTiles()}
+        {isMultiPage ? renderMultiPageTiles() : renderSinglePageTiles()}
         {wrapWithEmptyTiles ? (
           <li
             className={'emptyTile'}
