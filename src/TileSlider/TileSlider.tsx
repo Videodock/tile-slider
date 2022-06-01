@@ -94,7 +94,8 @@ const TileSlider = <T extends unknown>({
   const needControls: boolean = showControls && isMultiPage;
   const showLeftControl: boolean = needControls && !(cycleMode === 'stop' && state.index === 0);
   const showRightControl: boolean = needControls && !(cycleMode === 'stop' && state.index === items.length - tilesToShow);
-  const renderCount = isMultiPage ? tilesToShow + overscan * 2 + (pageStep === 'tile' ? 0 : 2) : tilesToShow;
+  const pageStepCompensation = pageStep === 'tile' ? 0 : 2;
+  const renderAmount = isMultiPage ? tilesToShow + overscan * 2 + pageStepCompensation : tilesToShow;
 
   /**
    * Slide all tiles in the given direction. Currently, only 'left' or 'right' are supported.
@@ -300,18 +301,17 @@ const TileSlider = <T extends unknown>({
 
   const renderMultiPageTiles = () => {
     const tiles = [];
-    const end = renderCount + state.index;
+    const end = renderAmount + state.index;
     const firstInView = state.slideToIndex + tilesToShow;
     const lastInView = tilesToShow * 2 + state.slideToIndex;
 
     for (let renderIndex = state.index; renderIndex < end; renderIndex++) {
       const isInView = renderIndex > firstInView && renderIndex <= lastInView;
-
-      const circularIndex = getCircularIndex(renderIndex, renderCount);
-      const indexOfItem = getCircularIndex(renderIndex, items.length);
+      const indexOverscanCompensation = renderIndex - tilesToShow - 1;
+      const indexOfItem = getCircularIndex(indexOverscanCompensation, items.length);
 
       const item = items[indexOfItem];
-      const key = `tile_${circularIndex}`;
+      const key = `tile_${indexOverscanCompensation}`;
 
       tiles.push(
         <li
@@ -325,7 +325,7 @@ const TileSlider = <T extends unknown>({
             transition: !isInView ? 'opacity .6s ease-in' : '',
           }}
         >
-          {renderTile(item, isInView, renderIndex, key, slide)}
+          {renderTile(item, isInView, indexOverscanCompensation, key, slide)}
         </li>,
       );
     }
