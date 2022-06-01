@@ -312,10 +312,9 @@ const TileSlider = <T extends unknown>({
       const indexOverscanCompensation = renderIndex - tilesToShow - 1;
 
       const indexOfItem = getCircularIndex(indexOverscanCompensation, items.length);
-      const circularIndex = getCircularIndex(renderIndex, renderAmount);
 
       const item = items[indexOfItem];
-      const key = `tile_${circularIndex}`;
+      const key = `tile_${renderIndex}`;
 
       tiles.push(
         <li
@@ -326,7 +325,7 @@ const TileSlider = <T extends unknown>({
             width: `${tileWidth}%`,
             paddingLeft: spacing / 2,
             paddingRight: spacing / 2,
-            transition: !isInView ? 'opacity .6s ease-in' : '',
+            transition: !isInView ? `opacity .6s ease-in ${transitionTime}` : '',
           }}
         >
           {renderTile(item, isInView, indexOverscanCompensation, key, slide)}
