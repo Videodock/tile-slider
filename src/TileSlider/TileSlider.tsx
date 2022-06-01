@@ -312,7 +312,7 @@ const TileSlider = <T extends unknown>({
       const indexOverscanCompensation = renderIndex - tilesToShow - 1;
 
       const indexOfItem = getCircularIndex(indexOverscanCompensation, items.length);
-      const circularIndex = getCircularIndex(indexOverscanCompensation, renderAmount);
+      const circularIndex = getCircularIndex(renderIndex, renderAmount);
 
       const item = items[indexOfItem];
       const key = `tile_${circularIndex}`;
