@@ -35,6 +35,7 @@ export declare type TileSliderProps<T> = {
     onSwipeEnd?: () => void;
     onSlideEnd?: () => void;
     overscan?: number;
+    throttleOnTransition?: boolean;
 };
-declare const TileSlider: <T extends unknown>({ items, tilesToShow, cycleMode, spacing, minimalTouchMovement, showControls, animated, transitionTime, transitionTimingFunction, wrapWithEmptyTiles, showDots, pageStep, renderTile, renderLeftControl, renderRightControl, renderPaginationDots, renderAriaLabel, className, onSwipeStart, onSwipeEnd, onSlideEnd, overscan, }: TileSliderProps<T>) => JSX.Element;
+declare const TileSlider: <T extends unknown>({ items, tilesToShow, cycleMode, spacing, minimalTouchMovement, showControls, animated, transitionTime, transitionTimingFunction, wrapWithEmptyTiles, showDots, pageStep, renderTile, renderLeftControl, renderRightControl, renderPaginationDots, renderAriaLabel, className, onSwipeStart, onSwipeEnd, onSlideEnd, overscan, throttleOnTransition, }: TileSliderProps<T>) => JSX.Element;
 export default TileSlider;

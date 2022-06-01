@@ -139,7 +139,7 @@ const TileSlider = <T extends unknown>({
 
       return true;
     },
-    [state.inTransition, state.index, pageStep, tilesToShow, items.length, tileWidth, cycleMode, animated],
+    [throttleOnTransition, state.inTransition, state.index, pageStep, tilesToShow, items.length, tileWidth, cycleMode, animated],
   );
 
   const verticalScrollBlockedRef = useRef(false);
