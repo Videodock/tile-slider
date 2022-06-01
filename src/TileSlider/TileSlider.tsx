@@ -49,6 +49,7 @@ export type TileSliderProps<T> = {
   onSwipeEnd?: () => void;
   onSlideEnd?: () => void;
   overscan?: number;
+  throttleOnTransition?: boolean;
 };
 
 const getCircularIndex = (index: number, length: number) => ((index % length) + length) % length;
@@ -76,6 +77,7 @@ const TileSlider = <T extends unknown>({
   onSwipeEnd,
   onSlideEnd,
   overscan = tilesToShow,
+  throttleOnTransition = false,
 }: TileSliderProps<T>) => {
   const frameRef = useRef<HTMLUListElement>() as React.MutableRefObject<HTMLUListElement>;
   const [state, setState] = useState({
@@ -102,7 +104,7 @@ const TileSlider = <T extends unknown>({
    */
   const slide = useCallback(
     (direction: Direction): boolean => {
-      if (state.inTransition) return false;
+      if (throttleOnTransition && state.inTransition) return false;
 
       const directionFactor = direction === 'right' ? 1 : -1;
       const stepCount = pageStep === 'page' ? tilesToShow : 1;
