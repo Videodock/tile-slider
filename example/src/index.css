@@ -11,8 +11,15 @@ body {
   max-width: 95vw;
   overflow: hidden;
 }
+
 .exampleMargin {
   padding: 64px;
+}
+
+@media screen and (max-width: 640px) {
+  .exampleMargin {
+    padding: 16px;
+  }
 }
 
 .sliderContainer {
@@ -44,7 +51,7 @@ body {
   background-color: rgb(60,60,60);
   color: white;
   transform: translateY(50%);
-};
+}
 
 .dot {
   display: inline-block;

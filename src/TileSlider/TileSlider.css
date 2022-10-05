@@ -1,27 +1,30 @@
-.root {
+.TileSlider {
   overflow: hidden;
   position: relative;
 }
 
-.container {
+.TileSlider-container {
+  position: relative;
   display: block;
+  width: 100%;
   margin: 0;
   padding: 0;
   white-space: nowrap;
+  will-change: transform;
 }
 
-.tile {
+.TileSlider-tile {
   display: inline-block;
   list-style-type: none;
   white-space: normal;
   box-sizing: border-box;
 }
 
-.emptyTile {
+.TileSlider-emptyTile {
   box-sizing: border-box;
-
 }
-.emptyTile::before {
+
+.TileSlider-emptyTile::before {
   content: '';
   display: block;
   padding-top: 56.25%;
@@ -29,7 +32,7 @@
   border-radius: 4px;
 }
 
-.leftControl {
+.TileSlider-leftControl {
   left: 0px;
   position: absolute;
   top: 50%;
@@ -37,14 +40,14 @@
   z-index: 1;
 }
 
-.rightControl {
+.TileSlider-rightControl {
   position: absolute;
   right: 0px;
   top: 50%;
   transform: translateY(-100%);
 }
 
-.dots {
+.TileSlider-dots {
   position: relative;
   display: flex;
   justify-content: center;
