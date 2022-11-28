@@ -90,7 +90,7 @@ const TileSlider = <T extends unknown>({
   });
   const tileWidth: number = 100 / tilesToShow;
   const isMultiPage: boolean = items?.length > tilesToShow;
-  const leftOffset: number = isMultiPage ? 100 - tileWidth * (tilesToShow + 1) + -100 : wrapWithEmptyTiles ? -100 : 0;
+  const leftOffset: number = isMultiPage ? 100 - tileWidth * tilesToShow + -100 : wrapWithEmptyTiles ? -100 : 0;
   const pages = items.length / tilesToShow;
   const transitionBasis: string = isMultiPage && animated ? `transform ${transitionTime} ${transitionTimingFunction}` : '';
   const needControls: boolean = showControls && isMultiPage;
@@ -304,17 +304,18 @@ const TileSlider = <T extends unknown>({
   const renderMultiPageTiles = () => {
     const tiles = [];
     const end = renderAmount + state.index;
-    const firstInView = state.slideToIndex + tilesToShow;
-    const lastInView = tilesToShow * 2 + state.slideToIndex;
+    const firstInView = state.slideToIndex + overscan;
+    const lastInView = overscan * 2 + state.slideToIndex;
 
     for (let renderIndex = state.index; renderIndex < end; renderIndex++) {
-      const isInView = renderIndex > firstInView && renderIndex <= lastInView;
-      const indexOverscanCompensation = renderIndex - tilesToShow - 1;
+      const isInView = renderIndex >= firstInView && renderIndex < lastInView;
+      // To render the item in the correct order, we need a index that reflects the first item that is visible in the viewport relative to the current renderIndex.
+      const indexWithoutOverscan = renderIndex - overscan;
 
-      const indexOfItem = getCircularIndex(indexOverscanCompensation, items.length);
+      const indexOfItem = getCircularIndex(indexWithoutOverscan, items.length);
 
       const item = items[indexOfItem];
-      const key = `tile_${renderIndex}`;
+      const key = `tile_${indexWithoutOverscan}`;
 
       tiles.push(
         <li
@@ -328,7 +329,7 @@ const TileSlider = <T extends unknown>({
             transition: !isInView ? `opacity .6s ease-in ${transitionTime}` : '',
           }}
         >
-          {renderTile(item, isInView, indexOverscanCompensation, key, slide)}
+          {renderTile(item, isInView, indexWithoutOverscan, key, slide)}
         </li>,
       );
     }
@@ -388,4 +389,4 @@ const TileSlider = <T extends unknown>({
   );
 };
 
-export default TileSlider;
+export { TileSlider };
