@@ -240,7 +240,7 @@ const TileSlider = <T,>({
       index: resetIndex,
       transform: 0,
       transition: 'none',
-      inTransition: true,
+      inTransition: false,
       slideBefore: true,
     }));
   };
