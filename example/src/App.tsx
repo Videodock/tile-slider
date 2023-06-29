@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 
-import TileSlider from '../../src/TileSlider/TileSlider';
+import { TileSlider } from '../../src/TileSlider/TileSlider';
 import type { RenderTile, RenderControl } from '../../src/TileSlider/TileSlider';
 
 type Tile = {
