@@ -4,8 +4,8 @@ export declare const CYCLE_MODE_STOP = "stop";
 export declare const CYCLE_MODE_RESTART = "restart";
 export declare const CYCLE_MODE_ENDLESS = "endless";
 export type CycleMode = 'stop' | 'restart' | 'endless';
-export type RenderTile<T> = (item: T, isInView: boolean, listIndex: number, renderKey: string, slide?: (direction: Direction) => void) => JSX.Element;
-export type RenderControl = (props: ControlProps) => JSX.Element;
+export type RenderTile<T> = (item: T, isInView: boolean, listIndex: number, renderKey: string, slide?: (direction: Direction) => void) => React.ReactElement;
+export type RenderControl = (props: ControlProps) => React.ReactElement;
 export type ControlProps = {
     onClick: () => void;
     disabled: boolean;
