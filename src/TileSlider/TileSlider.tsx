@@ -243,6 +243,8 @@ const TileSlider = <T,>({
       inTransition: false,
       slideBefore: true,
     }));
+
+    onSlideEnd && onSlideEnd();
   };
 
   const handleTransitionEnd = (event: React.TransitionEvent<HTMLUListElement>) => {
