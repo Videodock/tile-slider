@@ -14,8 +14,8 @@ export type RenderTile<T> = (
   listIndex: number,
   renderKey: string,
   slide?: (direction: Direction) => void,
-) => JSX.Element;
-export type RenderControl = (props: ControlProps) => JSX.Element;
+) => React.ReactElement;
+export type RenderControl = (props: ControlProps) => React.ReactElement;
 
 export type ControlProps = {
   onClick: () => void;
@@ -274,7 +274,7 @@ const TileSlider = <T,>({
       const length = pages;
 
       return (
-        <div className={'dots'}>
+        <div className="TileSlider-dots">
           {Array.from({ length }, (_, pageIndex) => {
             return renderPaginationDots(state.index / tilesToShow, pageIndex);
           })}
@@ -289,7 +289,7 @@ const TileSlider = <T,>({
 
       return (
         <li
-          className={'tile'}
+          className="TileSlider-tile"
           key={key}
           aria-label={renderAriaLabel && renderAriaLabel(item, index, key, items.length)}
           style={{
@@ -321,7 +321,7 @@ const TileSlider = <T,>({
 
       tiles.push(
         <li
-          className={'tile'}
+          className="TileSlider-tile"
           key={key}
           aria-label={renderAriaLabel && renderAriaLabel(item, indexOfItem, key, items.length)}
           style={{
@@ -340,9 +340,9 @@ const TileSlider = <T,>({
   };
 
   return (
-    <div className={clx('root', className)}>
+    <div className={clx('TileSlider-root', className)}>
       {showLeftControl && !!renderLeftControl && (
-        <div className={'leftControl'}>
+        <div className="TileSlider-leftControl">
           {renderLeftControl({
             onClick: () => slide('left'),
             disabled: leftControlDisabled,
@@ -351,14 +351,14 @@ const TileSlider = <T,>({
       )}
       <ul
         ref={frameRef}
-        className={'container'}
+        className="TileSlider-container"
         style={ulStyle}
         onTouchStart={isMultiPage ? handleTouchStart : undefined}
         onTransitionEnd={handleTransitionEnd}
       >
         {wrapWithEmptyTiles ? (
           <li
-            className={'emptyTile'}
+            className="TileSlider-emptyTile"
             style={{
               width: `${tileWidth}%`,
               paddingLeft: spacing / 2,
@@ -369,7 +369,7 @@ const TileSlider = <T,>({
         {isMultiPage ? renderMultiPageTiles() : renderSinglePageTiles()}
         {wrapWithEmptyTiles ? (
           <li
-            className={'emptyTile'}
+            className="TileSlider-emptyTile"
             style={{
               width: `${tileWidth}%`,
               paddingLeft: spacing / 2,
@@ -379,7 +379,7 @@ const TileSlider = <T,>({
         ) : null}
       </ul>
       {showRightControl && !!renderRightControl && (
-        <div className={'rightControl'}>
+        <div className="TileSlider-rightControl">
           {renderRightControl({
             onClick: () => slide('right'),
             disabled: rightControlDisabled,

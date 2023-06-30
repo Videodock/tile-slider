@@ -1,27 +1,27 @@
-.root {
+.TileSlider-root {
   overflow: hidden;
   position: relative;
 }
 
-.container {
+.TileSlider-container {
   display: block;
   margin: 0;
   padding: 0;
   white-space: nowrap;
 }
 
-.tile {
+.TileSlider-tile {
   display: inline-block;
   list-style-type: none;
   white-space: normal;
   box-sizing: border-box;
 }
 
-.emptyTile {
+.TileSlider-emptyTile {
   box-sizing: border-box;
 
 }
-.emptyTile::before {
+.TileSlider-emptyTile::before {
   content: '';
   display: block;
   padding-top: 56.25%;
@@ -29,22 +29,22 @@
   border-radius: 4px;
 }
 
-.leftControl {
-  left: 0px;
+.TileSlider-leftControl {
+  left: 0;
   position: absolute;
   top: 50%;
   transform: translateY(-100%);
   z-index: 1;
 }
 
-.rightControl {
+.TileSlider-rightControl {
   position: absolute;
-  right: 0px;
+  right: 0;
   top: 50%;
   transform: translateY(-100%);
 }
 
-.dots {
+.TileSlider-dots {
   position: relative;
   display: flex;
   justify-content: center;
