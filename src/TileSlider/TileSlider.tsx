@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useEffect, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 
 import './TileSlider.css';
 import { clx } from './utils';
@@ -54,7 +54,7 @@ export type TileSliderProps<T> = {
 
 const getCircularIndex = (index: number, length: number) => ((index % length) + length) % length;
 
-const TileSlider = <T extends unknown>({
+const TileSlider = <T,>({
   items,
   tilesToShow = 6,
   cycleMode = 'endless',
@@ -80,24 +80,26 @@ const TileSlider = <T extends unknown>({
   throttleOnTransition = false,
 }: TileSliderProps<T>) => {
   const frameRef = useRef<HTMLUListElement>() as React.MutableRefObject<HTMLUListElement>;
-  const [state, setState] = useState({
-    index: 0,
-    slideToIndex: 0,
-    transform: 0,
-    inTransition: false,
-    slideBefore: false,
-    afterReset: false,
-  });
   const tileWidth: number = 100 / tilesToShow;
   const isMultiPage: boolean = items?.length > tilesToShow;
   const leftOffset: number = isMultiPage ? 100 - tileWidth * tilesToShow + -100 : wrapWithEmptyTiles ? -100 : 0;
   const pages = items.length / tilesToShow;
   const transitionBasis: string = isMultiPage && animated ? `transform ${transitionTime} ${transitionTimingFunction}` : '';
   const needControls: boolean = showControls && isMultiPage;
-  const showLeftControl: boolean = needControls && !(cycleMode === 'stop' && state.index === 0);
-  const showRightControl: boolean = needControls && !(cycleMode === 'stop' && state.index === items.length - tilesToShow);
   const pageStepCompensation = pageStep === 'tile' ? 0 : 2;
   const renderAmount = isMultiPage ? tilesToShow + overscan * 2 + pageStepCompensation : tilesToShow;
+
+  const [state, setState] = useState({
+    index: 0,
+    slideToIndex: 0,
+    transform: 0,
+    transition: transitionBasis,
+    inTransition: false,
+    slideBefore: false,
+  });
+
+  const showLeftControl: boolean = needControls && !(cycleMode === 'stop' && state.index === 0);
+  const showRightControl: boolean = needControls && !(cycleMode === 'stop' && state.index === items.length - tilesToShow);
 
   /**
    * Slide all tiles in the given direction. Currently, only 'left' or 'right' are supported.
@@ -128,18 +130,31 @@ const TileSlider = <T extends unknown>({
         ...state,
         slideToIndex: nextIndex,
         transform: movement,
+        transition: transitionBasis,
         inTransition: true,
         slideBefore: true,
       }));
 
       if (!animated && frameRef.current) {
         const event = new TransitionEvent('transitionend', { bubbles: true });
+
         setTimeout(() => frameRef.current.dispatchEvent(event), 0);
       }
 
       return true;
     },
-    [throttleOnTransition, state.inTransition, state.index, pageStep, tilesToShow, items.length, tileWidth, cycleMode, animated],
+    [
+      throttleOnTransition,
+      state.inTransition,
+      state.index,
+      pageStep,
+      tilesToShow,
+      items.length,
+      tileWidth,
+      animated,
+      cycleMode,
+      transitionBasis,
+    ],
   );
 
   const verticalScrollBlockedRef = useRef(false);
@@ -205,19 +220,6 @@ const TileSlider = <T extends unknown>({
     [minimalTouchMovement, slide, onSwipeStart, onSwipeEnd],
   );
 
-  useEffect(() => {
-    if (state.afterReset) {
-      if (frameRef.current) frameRef.current.style.transition = transitionBasis;
-      if (onSlideEnd) onSlideEnd();
-
-      setState((state) => ({
-        ...state,
-        afterReset: false,
-        inTransition: false,
-      }));
-    }
-  }, [onSlideEnd, state.afterReset, transitionBasis]);
-
   const resetAnimation = (): void => {
     let resetIndex: number = state.slideToIndex;
 
@@ -233,16 +235,16 @@ const TileSlider = <T extends unknown>({
       }
     }
 
-    if (frameRef.current) frameRef.current.style.transition = 'none';
-
     setState((state) => ({
       ...state,
       index: resetIndex,
       transform: 0,
-      inTransition: true,
+      transition: 'none',
+      inTransition: false,
       slideBefore: true,
-      afterReset: true,
     }));
+
+    onSlideEnd && onSlideEnd();
   };
 
   const handleTransitionEnd = (event: React.TransitionEvent<HTMLUListElement>) => {
@@ -258,7 +260,7 @@ const TileSlider = <T extends unknown>({
     left: `${leftOffset}%`,
     position: 'relative',
     width: '100%',
-    transition: transitionBasis,
+    transition: state.transition,
     marginLeft: -spacing / 2,
     marginRight: -spacing / 2,
     willChange: 'transform',

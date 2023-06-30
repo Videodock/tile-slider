@@ -1,17 +1,17 @@
-/// <reference types="react" />
+import React from 'react';
 import './TileSlider.css';
 export declare const CYCLE_MODE_STOP = "stop";
 export declare const CYCLE_MODE_RESTART = "restart";
 export declare const CYCLE_MODE_ENDLESS = "endless";
-export declare type CycleMode = 'stop' | 'restart' | 'endless';
-export declare type RenderTile<T> = (item: T, isInView: boolean, listIndex: number, renderKey: string, slide?: (direction: Direction) => void) => JSX.Element;
-export declare type RenderControl = (props: ControlProps) => JSX.Element;
-export declare type ControlProps = {
+export type CycleMode = 'stop' | 'restart' | 'endless';
+export type RenderTile<T> = (item: T, isInView: boolean, listIndex: number, renderKey: string, slide?: (direction: Direction) => void) => JSX.Element;
+export type RenderControl = (props: ControlProps) => JSX.Element;
+export type ControlProps = {
     onClick: () => void;
     disabled: boolean;
 };
-declare type Direction = 'left' | 'right';
-export declare type TileSliderProps<T> = {
+type Direction = 'left' | 'right';
+export type TileSliderProps<T> = {
     items: T[];
     cycleMode?: CycleMode;
     tilesToShow?: number;
@@ -37,5 +37,5 @@ export declare type TileSliderProps<T> = {
     overscan?: number;
     throttleOnTransition?: boolean;
 };
-declare const TileSlider: <T extends unknown>({ items, tilesToShow, cycleMode, spacing, minimalTouchMovement, showControls, animated, transitionTime, transitionTimingFunction, wrapWithEmptyTiles, showDots, pageStep, renderTile, renderLeftControl, renderRightControl, renderPaginationDots, renderAriaLabel, className, onSwipeStart, onSwipeEnd, onSlideEnd, overscan, throttleOnTransition, }: TileSliderProps<T>) => JSX.Element;
-export default TileSlider;
+declare const TileSlider: <T>({ items, tilesToShow, cycleMode, spacing, minimalTouchMovement, showControls, animated, transitionTime, transitionTimingFunction, wrapWithEmptyTiles, showDots, pageStep, renderTile, renderLeftControl, renderRightControl, renderPaginationDots, renderAriaLabel, className, onSwipeStart, onSwipeEnd, onSlideEnd, overscan, throttleOnTransition, }: TileSliderProps<T>) => React.JSX.Element;
+export { TileSlider };
