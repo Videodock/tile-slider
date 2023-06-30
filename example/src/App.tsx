@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 
-import { TileSlider } from '../../src/TileSlider/TileSlider';
+import { TileSlider } from '../../src';
 import type { RenderTile, RenderControl } from '../../src/TileSlider/TileSlider';
 
 type Tile = {
@@ -8,7 +8,7 @@ type Tile = {
 };
 
 const App = () => {
-  const items: Tile[] = Array.from({ length: 5 }, (_, index) => ({ title: `Tile ${index}` }));
+  const items: Tile[] = Array.from({ length: 10 }, (_, index) => ({ title: `Tile ${index}` }));
 
   const renderTile: RenderTile<Tile> = useCallback(
     (item, isInView) => <div className={`exampleTile ${!isInView ? 'outOfView' : ''}`}>{item.title}</div>,
