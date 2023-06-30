@@ -5,20 +5,25 @@
 `@videodock/tile-slider` is a React component which can be used to create a performant and accessible slider for your React
 website. It only renders the visible tiles, meaning that you can have thousands of items and still get a good performing site and animation.
 
-It only needs React... no other dependencies needed! 
+It only needs React... no other dependencies needed!
+
+## Requirements
+
+- react >= 17
+- react-dom >= 17
 
 ## Installation
 
 The package can be installed using NPM or Yarn.
 
 **Yarn:**
-```
-$ yarn add @videodock/tile-slider
+```shell
+yarn add @videodock/tile-slider
 ```
 
 **NPM:**
-```
-$ npm install @videodock/tile-slider
+```shell
+npm install @videodock/tile-slider
 ```
 
 ## Usage
