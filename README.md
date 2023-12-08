@@ -74,3 +74,13 @@ const App: React.FC = () => {
 
 export default App;
 ```
+
+## Example
+
+Run the example app, which showcases all features of TileSlider:
+
+```shell
+cd example
+yarn
+yarn start
+```
