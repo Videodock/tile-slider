@@ -1,6 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
 
-import './TileSlider.css';
 import { clx } from './utils';
 
 export const CYCLE_MODE_STOP = 'stop';
