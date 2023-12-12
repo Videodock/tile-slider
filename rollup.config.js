@@ -2,7 +2,7 @@ import peerDepsExternal from "rollup-plugin-peer-deps-external";
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import typescript from "rollup-plugin-typescript2";
-import css from "rollup-plugin-import-css";
+import copy from 'rollup-plugin-copy';
 
 const packageJson = require("./package.json");
 
@@ -25,6 +25,10 @@ export default {
     resolve(),
     commonjs(),
     typescript({ useTsconfigDeclarationDir: true }),
-    css(),
+    copy({
+      targets: [
+        { src: 'src/TileSlider/TileSlider.css', dest: 'lib' }
+      ]
+    })
   ]
 };

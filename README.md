@@ -34,6 +34,7 @@ This section will be extended. For now, please see the below example which uses 
 
 ```tsx
 import { TileSlider, CYCLE_MODE_RESTART } from '@videodock/tile-slider';
+import '@videodock/tile-slider/TileSlider.css';
 
 type Data = { title: string; imageUrl: string };
 
