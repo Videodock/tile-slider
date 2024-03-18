@@ -19,7 +19,6 @@
 
 .TileSlider-emptyTile {
   box-sizing: border-box;
-
 }
 .TileSlider-emptyTile::before {
   content: '';
