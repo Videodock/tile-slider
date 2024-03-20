@@ -38,6 +38,8 @@ jobs:
         run: |
           yarn install
           yarn build
+        env:
+          APP_BASE: /tile-slider/
         working-directory: example
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
