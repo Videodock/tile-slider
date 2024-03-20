@@ -10,16 +10,16 @@ type Tile = {
 };
 
 const images = [
-  '/image1.jpeg',
-  '/image2.jpeg',
-  '/image3.jpeg',
-  '/image4.jpeg',
-  '/image5.jpeg',
-  '/image6.jpeg',
-  '/image7.jpeg',
-  '/image8.jpeg',
-  '/image9.jpeg',
-  '/image10.jpeg',
+  'image1.jpeg',
+  'image2.jpeg',
+  'image3.jpeg',
+  'image4.jpeg',
+  'image5.jpeg',
+  'image6.jpeg',
+  'image7.jpeg',
+  'image8.jpeg',
+  'image9.jpeg',
+  'image10.jpeg',
 ];
 
 const IconLeft = () => (
@@ -70,6 +70,14 @@ const App = () => {
         <header>
           <h1>@videodock/tile-slider</h1>
         </header>
+        <p>
+          @videodock/tile-slider is a React component of a performant and accessible slider for your React project.
+          It only renders the visible tiles, meaning that you can have thousands of items and still get a good
+          performing site and animation.
+        </p>
+        <p>
+          It only needs React... no other dependencies needed!
+        </p>
         <h2>Imports</h2>
         <p>
           Start by importing the <code>TileSlider</code> component. Optionally, import the typings and default styling
@@ -111,8 +119,12 @@ const items: Tile[] = Array.from({ length: 10 }, (_, index) => ({
   </div>
 );
 
-const renderLeftControl: RenderControl = ({ onClick }) => <button className="control" onClick={onClick} aria-label="Previous page">{'<'}</button>;
-const renderRightControl: RenderControl = ({ onClick }) => <button className="control" onClick={onClick} aria-label="Next page">{'>'}</button>;`} />
+const renderLeftControl: RenderControl = ({ onClick }) => (
+  <button className="control" onClick={onClick} aria-label="Previous page">{'<'}</button>
+);
+const renderRightControl: RenderControl = ({ onClick }) => (
+  <button className="control" onClick={onClick} aria-label="Next page">{'>'}</button>
+);`} />
         </div>
 
         <h2>Default slider</h2>
@@ -238,6 +250,20 @@ const renderRightControl: RenderControl = ({ onClick }) => <button className="co
           />
         </div>
         <h3>Code</h3>
+        <div style={{ overflow: 'hidden', borderRadius: 8, marginBottom: 16 }}>
+          <CopyBlock language="css" theme={dracula} showLineNumbers text={`.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin: 0 5px;
+  border-radius: 50%;
+  transition: all 200ms ease;
+}
+
+.activeDot {
+  color: gray;
+}`} />
+        </div>
         <div style={{ overflow: 'hidden', borderRadius: 8 }}>
           <CopyBlock language="tsx" theme={dracula} highlight="1-5,20,21" showLineNumbers text={`const renderPaginationDots: RenderPaginationDots = (index, pageIndex) => (
   <span key={pageIndex} className={\`dot\${index === pageIndex ? ' activeDot' : ''}\`}>
