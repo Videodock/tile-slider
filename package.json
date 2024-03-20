@@ -33,7 +33,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-rulesdir": "^0.2.2",
     "postcss": "^8.4.36",
-    "prettier": "^2.8.8",
+    "prettier": "^3.2.5",
     "rollup": "^4.13.0",
     "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-import-css": "^3.5.0",
