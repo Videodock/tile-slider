@@ -30,9 +30,11 @@ jobs:
         uses: actions/configure-pages@v4
       - name: Setup Node.js
         uses: actions/setup-node@v3
-      - name: Install dependencies
-        run: yarn install
-      - name: Build example app
+      - name: Install and build TileSlider
+        run: |
+          yarn install
+          yarn build
+      - name: Install and build example app
         run: |
           yarn install
           yarn build
