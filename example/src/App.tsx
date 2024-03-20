@@ -64,6 +64,8 @@ const App = () => {
     image: images[index] ? `${import.meta.env.BASE_URL}${images[index]}` : '',
   }));
 
+  const smallScreen = window.matchMedia('screen and (max-width: 640px)').matches;
+
   return (
     <div className="example">
       <div className="exampleMargin">
@@ -133,6 +135,7 @@ const renderRightControl: RenderControl = ({ onClick }) => (
         <div className="sliderContainer">
           <TileSlider
             items={items}
+            tilesToShow={smallScreen ? 2 : 6}
             renderTile={renderTile}
             renderLeftControl={renderLeftControl}
             renderRightControl={renderRightControl}
@@ -141,9 +144,13 @@ const renderRightControl: RenderControl = ({ onClick }) => (
         <h3>Code</h3>
         <div style={{ overflow: 'hidden', borderRadius: 8 }}>
           <CopyBlock language="tsx" theme={dracula} showLineNumbers text={`const Slider = () => {
+  // dynamic page size based on screen size
+  const smallScreen = window.matchMedia('screen and (max-width: 640px)').matches;
+  
   return (
     <TileSlider
       items={items}
+      tilesToShow={smallScreen ? 2 : 6}
       renderTile={renderTile}
       renderLeftControl={renderLeftControl}
       renderRightControl={renderRightControl}
@@ -160,7 +167,7 @@ const renderRightControl: RenderControl = ({ onClick }) => (
           <TileSlider
             className="slider"
             items={items}
-            tilesToShow={4}
+            tilesToShow={smallScreen ? 2 : 4}
             spacing={16}
             cycleMode="restart" // Set the cycle mode
             transitionTime="0.3s" // Decrease the animation time
@@ -196,7 +203,7 @@ const renderRightControl: RenderControl = ({ onClick }) => (
           <TileSlider
             className="slider showOutOfView"
             items={items}
-            tilesToShow={5}
+            tilesToShow={smallScreen ? 2 : 5}
             spacing={16}
             cycleMode="restart"
             transitionTime="0.3s"
@@ -218,7 +225,7 @@ const renderRightControl: RenderControl = ({ onClick }) => (
     <TileSlider
       className="slider showOutOfView"
       items={items}
-      tilesToShow={4}
+      tilesToShow={5}
       spacing={16}
       cycleMode="restart"
       transitionTime="0.3s"
@@ -237,7 +244,7 @@ const renderRightControl: RenderControl = ({ onClick }) => (
           <TileSlider
             className="slider"
             items={items}
-            tilesToShow={5}
+            tilesToShow={smallScreen ? 2 : 5}
             spacing={16}
             cycleMode="restart"
             transitionTime="0.3s"
@@ -276,7 +283,7 @@ const Slider = () => {
     <TileSlider
       className="slider"
       items={items}
-      tilesToShow={4}
+      tilesToShow={5}
       spacing={16}
       cycleMode="restart"
       transitionTime="0.3s"
@@ -299,7 +306,7 @@ const Slider = () => {
           <TileSlider
             className="slider"
             items={items}
-            tilesToShow={5}
+            tilesToShow={smallScreen ? 2 : 5}
             spacing={16}
             cycleMode="restart"
             transitionTime="0.3s"
@@ -316,7 +323,7 @@ const Slider = () => {
     <TileSlider
       className="slider"
       items={items}
-      tilesToShow={4}
+      tilesToShow={5}
       spacing={16}
       cycleMode="restart"
       transitionTime="0.3s"

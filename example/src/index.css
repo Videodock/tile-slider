@@ -30,6 +30,12 @@ body {
   padding: 64px;
 }
 
+@media screen and (max-width: 640px) {
+  .exampleMargin {
+    padding: 64px 16px;
+  }
+}
+
 .sliderContainer {
   margin: 32px 0;
 }
