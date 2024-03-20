@@ -61,7 +61,7 @@ const renderPaginationDots: RenderPaginationDots = (index, pageIndex) => (
 const App = () => {
   const items: Tile[] = Array.from({ length: 10 }, (_, index) => ({
     title: `Tile ${index}`,
-    image: images[index] ?? '',
+    image: images[index] ? `${import.meta.env.BASE_URL}${images[index]}` : '',
   }));
 
   return (
