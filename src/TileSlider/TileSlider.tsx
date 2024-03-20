@@ -15,6 +15,7 @@ export type RenderTile<T> = (
   slide?: (direction: Direction) => void,
 ) => React.ReactElement;
 export type RenderControl = (props: ControlProps) => React.ReactElement;
+export type RenderPaginationDots = (index: number, pageIndex: number) => React.ReactElement;
 
 export type ControlProps = {
   onClick: () => void;
@@ -41,8 +42,7 @@ export type TileSliderProps<T> = {
   renderTile: RenderTile<T>;
   renderLeftControl?: RenderControl;
   renderRightControl?: RenderControl;
-  passiveEventlistener?: boolean;
-  renderPaginationDots?: (index: number, pageIndex: number) => JSX.Element;
+  renderPaginationDots?: RenderPaginationDots;
   renderAriaLabel?: (item: T, index: number, key: string, total: number) => string;
   onSwipeStart?: () => void;
   onSwipeEnd?: () => void;
@@ -256,9 +256,9 @@ const TileSlider = <T,>({
     transform: `translateX(${state.transform}%)`,
     // prettier-ignore
     'WebkitTransform': `translateX(${state.transform}%)`,
-    left: `${leftOffset}%`,
+    left: `calc(${leftOffset}% - ${spacing}px)`,
     position: 'relative',
-    width: '100%',
+    width: `calc(100% + ${spacing}px)`,
     transition: state.transition,
     marginLeft: -spacing / 2,
     marginRight: -spacing / 2,
