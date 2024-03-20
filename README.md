@@ -7,6 +7,10 @@ It only renders the visible tiles, meaning that you can have thousands of items 
 
 It only needs React... no other dependencies needed!
 
+Checkout the demo page for examples
+
+- https://videodock.github.io/tile-slider/
+
 ## Requirements
 
 - react >= 17
@@ -14,18 +18,12 @@ It only needs React... no other dependencies needed!
 
 ## Installation
 
-The package can be installed using NPM or Yarn.
-
-**Yarn:**
+Install this package via (P)NPM or Yarn: 
 
 ```shell
-yarn add @videodock/tile-slider
-```
-
-**NPM:**
-
-```shell
-npm install @videodock/tile-slider
+$ yarn add @videodock/tile-slider
+$ npm install @videodock/tile-slider
+$ pnpm install @videodock/tile-slider
 ```
 
 ## Usage
@@ -34,7 +32,7 @@ This section will be extended. For now, please see the below example which uses 
 
 ```tsx
 import { TileSlider, CYCLE_MODE_RESTART } from '@videodock/tile-slider';
-import '@videodock/tile-slider/TileSlider.css';
+import '@videodock/tile-slider/lib/TileSlider.css';
 
 type Data = { title: string; imageUrl: string };
 
