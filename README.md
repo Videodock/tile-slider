@@ -30,6 +30,9 @@ $ pnpm install @videodock/tile-slider
 
 This section will be extended. For now, please see the below example which uses all the supported features.
 
+#### Important: .css file import requirement (version 1.0.1 and above)
+Starting from version `1.0.1`, it's crucial to include the `.css` import explicitly, as demonstrated in the example below:
+
 ```tsx
 import { TileSlider, CYCLE_MODE_RESTART } from '@videodock/tile-slider';
 import '@videodock/tile-slider/lib/TileSlider.css';
