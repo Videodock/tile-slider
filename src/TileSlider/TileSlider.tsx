@@ -212,8 +212,10 @@ const TileSlider = <T, > ({
         }));
       }
 
+      const maxDelta = frameRef.current.offsetWidth;
+
       // move frame
-      frameRef.current.style.transform = `translateX(${delta}px)`;
+      frameRef.current.style.transform = `translateX(${Math.max(-maxDelta, Math.min(maxDelta, delta))}px)`;
     }
   }, [onSwipeStart, state.animationRunning]);
 
