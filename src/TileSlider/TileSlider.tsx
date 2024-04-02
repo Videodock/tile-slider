@@ -6,6 +6,8 @@ export const CYCLE_MODE_STOP = 'stop';
 export const CYCLE_MODE_RESTART = 'restart';
 export const CYCLE_MODE_ENDLESS = 'endless';
 
+export const PREFERS_REDUCED_MOTION = !window.matchMedia('(prefers-reduced-motion)').matches;
+
 export type CycleMode = 'stop' | 'restart' | 'endless';
 export type RenderTile<T> = (
   item: T,
@@ -60,7 +62,7 @@ const TileSlider = <T,>({
   spacing = 12,
   minimalTouchMovement = 30,
   showControls = true,
-  animated = !window.matchMedia('(prefers-reduced-motion)').matches,
+  animated = PREFERS_REDUCED_MOTION,
   transitionTime = '0.6s',
   transitionTimingFunction = 'cubic-bezier(0.39, 0.06, 0.29, 0.96)',
   wrapWithEmptyTiles = false,
@@ -76,7 +78,7 @@ const TileSlider = <T,>({
   onSwipeEnd,
   onSlideEnd,
   overscan = tilesToShow,
-  throttleOnTransition = false,
+  throttleOnTransition = true,
 }: TileSliderProps<T>) => {
   const frameRef = useRef<HTMLUListElement>() as React.MutableRefObject<HTMLUListElement>;
   const tileWidth: number = 100 / tilesToShow;
@@ -93,8 +95,8 @@ const TileSlider = <T,>({
     slideToIndex: 0,
     transform: 0,
     transition: transitionBasis,
-    inTransition: false,
-    slideBefore: false,
+    animationRunning: false,
+    hasSlideBefore: false,
   });
 
   const showLeftControl: boolean = needControls && !(cycleMode === 'stop' && state.index === 0);
@@ -105,7 +107,7 @@ const TileSlider = <T,>({
    */
   const slide = useCallback(
     (direction: Direction): boolean => {
-      if (throttleOnTransition && state.inTransition) return false;
+      if (throttleOnTransition && state.animationRunning) return false;
 
       const directionFactor = direction === 'right' ? 1 : -1;
       const stepCount = pageStep === 'page' ? tilesToShow : 1;
@@ -144,7 +146,7 @@ const TileSlider = <T,>({
     },
     [
       throttleOnTransition,
-      state.inTransition,
+      state.animationRunning,
       state.index,
       pageStep,
       tilesToShow,
@@ -165,7 +167,7 @@ const TileSlider = <T,>({
         y: event.touches[0].clientY,
       };
 
-      function handleTouchMove(this: HTMLDocument, event: TouchEvent): void {
+      function handleTouchMove(event: TouchEvent): void {
         const newPosition: Position = {
           x: event.changedTouches[0].clientX,
           y: event.changedTouches[0].clientY,
@@ -182,7 +184,7 @@ const TileSlider = <T,>({
         }
       }
 
-      function handleTouchEnd(this: HTMLDocument, event: TouchEvent): void {
+      function handleTouchEnd(event: TouchEvent): void {
         const newPosition = {
           x: event.changedTouches[0].clientX,
           y: event.changedTouches[0].clientY,
@@ -219,7 +221,8 @@ const TileSlider = <T,>({
     [minimalTouchMovement, slide, onSwipeStart, onSwipeEnd],
   );
 
-  const resetAnimation = (): void => {
+  // Run code after the slide animation to set the new index
+  const postAnimationCleanup = (): void => {
     let resetIndex: number = state.slideToIndex;
 
     if (cycleMode !== CYCLE_MODE_ENDLESS) {
@@ -248,7 +251,7 @@ const TileSlider = <T,>({
 
   const handleTransitionEnd = (event: React.TransitionEvent<HTMLUListElement>) => {
     if (event.target === frameRef.current) {
-      resetAnimation();
+      postAnimationCleanup();
     }
   };
 
@@ -265,7 +268,7 @@ const TileSlider = <T,>({
     willChange: 'transform',
   } as React.CSSProperties;
 
-  const leftControlDisabled = (cycleMode === 'stop' && state.index === 0) || !state.slideBefore;
+  const leftControlDisabled = (cycleMode === 'stop' && state.index === 0) || !state.hasSlideBefore;
   const rightControlDisabled = cycleMode === 'stop' && state.index === items.length - tilesToShow;
 
   const paginationDots = () => {
@@ -290,7 +293,7 @@ const TileSlider = <T,>({
         <li
           className="TileSlider-tile"
           key={key}
-          aria-label={renderAriaLabel && renderAriaLabel(item, index, key, items.length)}
+          aria-label={renderAriaLabel?.(item, index, key, items.length)}
           style={{
             width: `${tileWidth}%`,
             paddingLeft: spacing / 2,
@@ -322,7 +325,7 @@ const TileSlider = <T,>({
         <li
           className="TileSlider-tile"
           key={key}
-          aria-label={renderAriaLabel && renderAriaLabel(item, indexOfItem, key, items.length)}
+          aria-label={renderAriaLabel?.(item, indexOfItem, key, items.length)}
           style={{
             width: `${tileWidth}%`,
             paddingLeft: spacing / 2,
