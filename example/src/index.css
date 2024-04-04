@@ -81,15 +81,28 @@ body {
   fill: currentColor;
 }
 
-.dot {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  margin: 0 5px;
-  border-radius: 50%;
-  transition: all 200ms ease;
+.paginationDots {
+  list-style: none;
+  padding: 0;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin: 12px;
 }
 
-.activeDot {
-  color: gray;
+.paginationDots > li {
+  display: inline-block;
+  margin: 0 2px;
+  border-radius: 50%;
+  transition: all 200ms ease;
+  cursor: pointer;
+}
+
+.paginationDots > li:hover {
+  scale: 1.2;
+}
+
+.paginationDots > li.activeDot {
+  scale: 1.5;
+  color: #1a1a1a;
 }

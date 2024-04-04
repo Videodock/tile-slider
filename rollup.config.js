@@ -26,7 +26,7 @@ export default {
     commonjs(),
     typescript({ useTsconfigDeclarationDir: true }),
     copy({
-      targets: [{ src: 'src/TileSlider/TileSlider.css', dest: 'lib' }],
+      targets: [{ src: 'src/style.css', dest: 'lib' }],
     }),
   ],
 };
