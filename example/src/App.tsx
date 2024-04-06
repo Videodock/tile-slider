@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CopyBlock, dracula } from 'react-code-blocks';
 
 import { easing, math, type RenderControl, type RenderPagination, type RenderTile, TileSlider, useResponsiveSize } from '../../src';
@@ -82,6 +82,7 @@ const manyItems = makeItems(5000);
 const App = () => {
   const smallScreen = window.matchMedia('screen and (max-width: 640px)').matches;
   const [tilesToShow] = useResponsiveSize([{ xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }]);
+  const [state, setState] = useState({ index: 0, total: items.length, page: 1, pages: 1 });
 
   return (
     <div className="example">
@@ -631,6 +632,55 @@ const Slider = () => {
       renderRightControl={renderRightControl}
       animated={false}
     />
+  );
+};
+        `}
+          />
+        </div>
+
+        <h2>Events and state</h2>
+        <h3>Example</h3>
+        <div className="sliderContainer">
+          <TileSlider
+            items={items}
+            tilesToShow={smallScreen ? 2 : 6}
+            renderTile={renderTile}
+            renderLeftControl={renderLeftControl}
+            renderRightControl={renderRightControl}
+            onSlideStart={setState}
+            onSlideEnd={setState}
+          />
+          <code style={{ marginTop: 16, padding: 8, display: 'inline-block', background: dracula.backgroundColor, borderRadius: 5 }}>
+            State: {JSON.stringify(state, null, 2)} <br/>
+            Circular index: {math.getCircularIndex(state.index, state.total)}
+          </code>
+        </div>
+        <h3>Code</h3>
+        <div style={{ overflow: 'hidden', borderRadius: 8 }}>
+          <CopyBlock
+            language="tsx"
+            theme={dracula}
+            highlight="1,12,13,15-18"
+            showLineNumbers
+            text={`const [state, setState] = useState({ index: 0, total: items.length, page: 1, pages: 1 });
+            
+const Slider = () => {
+  return (
+    <>
+      <TileSlider
+        items={items}
+        tilesToShow={4}
+        renderTile={renderTile}
+        renderLeftControl={renderLeftControl}
+        renderRightControl={renderRightControl}
+        onSlideStart={setState}
+        onSlideEnd={setState}
+      />
+      <code>
+        State: {JSON.stringify(state, null, 2)} <br/>
+        Circular index: {math.getCircularIndex(state.index, state.total)}
+      </code>
+    </>
   );
 };
         `}
