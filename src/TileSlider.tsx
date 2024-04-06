@@ -36,8 +36,10 @@ export type PaginationProps = {
   page: number;
   pages: number;
   slide: (direction: Direction) => void;
+  slideToIndex: (index: number) => void;
   slideToPage: (page: number) => void;
 };
+export type CallbackProps = Omit<PaginationProps, 'slide' | 'slideToIndex' | 'slideToPage'>;
 
 export type RenderControl = (props: ControlProps) => React.ReactElement;
 export type RenderPagination = (props: PaginationProps) => React.ReactElement;
@@ -58,8 +60,8 @@ export type TileSliderProps<T> = {
   renderPagination?: RenderPagination;
   onSwipeStart?: () => void;
   onSwipeEnd?: () => void;
-  onSlideStart?: () => void;
-  onSlideEnd?: () => void;
+  onSlideStart?: (props: CallbackProps) => void;
+  onSlideEnd?: (props: CallbackProps) => void;
   overscan?: number;
 };
 
@@ -87,7 +89,7 @@ export const TileSlider = <T,>({
   const gesturesRef = useRef<HTMLDivElement>() as React.MutableRefObject<HTMLDivElement>;
   const responsiveTileWidth = 100 / tilesToShow;
   const isMultiPage: boolean = items.length > tilesToShow;
-  const pages = items.length / tilesToShow;
+  const pages = Math.ceil(items.length / tilesToShow);
   const needControls: boolean = showControls && isMultiPage;
 
   const [state, setState] = useState({ index: 0, hasSlideBefore: false });
@@ -107,7 +109,7 @@ export const TileSlider = <T,>({
   const totalTiles = isMultiPage ? tilesToShow + (leftOverscan + rightOverscan) : items.length;
 
   const listOffset = isMultiPage ? (state.index - leftOverscan) * responsiveTileWidth : 0;
-
+  const page = Math.floor(getCircularIndex(state.index, items.length) / tilesToShow);
   const stableAnimationFn = useEventCallback(animationFn);
 
   const sliderDataRef = useRef({
@@ -150,7 +152,12 @@ export const TileSlider = <T,>({
     if (!animated) {
       setState({ index, hasSlideBefore: true });
       frameRef.current.style.transform = `translateX(${-responsiveTileWidth * index}%)`;
-      onSlideEnd?.();
+      onSlideEnd?.({
+        index: index,
+        total: items.length,
+        page,
+        pages,
+      });
       return;
     }
 
@@ -169,7 +176,12 @@ export const TileSlider = <T,>({
         requestAnimationFrame(snappingDampening);
       } else {
         frameRef.current.style.transform = `translateX(${-responsiveTileWidth * index}%)`;
-        onSlideEnd?.();
+        onSlideEnd?.({
+          index: index,
+          total: items.length,
+          page,
+          pages,
+        });
       }
 
       if (sliderDataRef.current.lastRenderedIndex !== newState.index) {
@@ -201,10 +213,15 @@ export const TileSlider = <T,>({
     (index: number) => {
       const newState = calculateState();
       setState((state) => ({ ...newState, index }));
-      onSlideStart?.();
+      onSlideStart?.({
+        index: index,
+        total: items.length,
+        page,
+        pages,
+      });
       handleSnapping(index, stableAnimationFn);
     },
-    [calculateState, handleSnapping, onSlideStart, stableAnimationFn],
+    [calculateState, handleSnapping, items.length, onSlideStart, page, pages, stableAnimationFn],
   );
 
   const slideToPage = useCallback(
@@ -240,9 +257,9 @@ export const TileSlider = <T,>({
       sliderDataRef.current.position = getSliderPosition();
 
       onSwipeStart?.();
-      onSlideStart?.();
+      onSlideStart?.({ index: state.index, page, pages, total: items.length });
     },
-    [getSliderPosition, onSlideStart, onSwipeStart],
+    [getSliderPosition, items.length, onSlideStart, onSwipeStart, page, pages, state.index],
   );
 
   const handleTouchMove = useCallback(
@@ -339,8 +356,6 @@ export const TileSlider = <T,>({
     return Array.from({ length: totalTiles }, (_, index) => renderTileContainer(startIndex + index));
   };
 
-  const page = Math.floor(getCircularIndex(state.index, items.length) / tilesToShow);
-
   return (
     <div className={clx('TileSlider', className)}>
       {showLeftControl && !!renderLeftControl && (
@@ -364,7 +379,7 @@ export const TileSlider = <T,>({
           })}
         </div>
       )}
-      {renderPagination?.({ index: state.index, total: items.length, page, pages, slide, slideToPage })}
+      {renderPagination?.({ index: state.index, total: items.length, page, pages, slide, slideToPage, slideToIndex })}
     </div>
   );
 };
