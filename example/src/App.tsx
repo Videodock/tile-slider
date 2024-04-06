@@ -1,9 +1,7 @@
 import React from 'react';
 import { CopyBlock, dracula } from 'react-code-blocks';
 
-import { type RenderControl, type RenderPagination, type RenderTile, TileSlider } from '../../src';
-import { getCircularIndex } from '../../src/utils/math';
-import { useResponsiveSize } from '../../src/hooks/useResponsiveSize';
+import { easing, math, type RenderControl, type RenderPagination, type RenderTile, TileSlider, useResponsiveSize } from '../../src';
 import '../../src/style.css';
 
 type Tile = {
@@ -70,11 +68,11 @@ const renderPagination: RenderPagination = (props) => {
 
 const makeItems = (length: number): Tile[] =>
   Array.from({ length }, (_, index) => {
-    const imageIndex = getCircularIndex(index, 10); // we only have 10 images :)
+    const imageIndex = math.getCircularIndex(index, 10); // we only have 10 images :)
 
     return {
       title: `Tile ${index}`,
-      image: images[imageIndex] ? `${import.meta.env.BASE_URL}${images[getCircularIndex(imageIndex, 10)]}` : '',
+      image: images[imageIndex] ? `${import.meta.env.BASE_URL}${images[math.getCircularIndex(imageIndex, 10)]}` : '',
     };
   });
 
@@ -92,16 +90,13 @@ const App = () => {
           <h1>@videodock/tile-slider</h1>
         </header>
         <p>
-          @videodock/tile-slider is a React component of a performant and accessible slider for your React project. It
-          only renders the
-          visible tiles, meaning that you can have thousands of items and still get a good performing site and
-          animation.
+          @videodock/tile-slider is a React component of a performant and accessible slider for your React project. It only renders the
+          visible tiles, meaning that you can have thousands of items and still get a good performing site and animation.
         </p>
         <p>It only needs React... no other dependencies needed!</p>
         <h2>Imports</h2>
         <p>
-          Start by importing the <code>TileSlider</code> component. Optionally, import the typings and default styling
-          as well.
+          Start by importing the <code>TileSlider</code> component. Optionally, import the typings and default styling as well.
         </p>
         <div style={{ overflow: 'hidden', borderRadius: 8 }}>
           <CopyBlock
@@ -117,8 +112,7 @@ import '@videodock/tile-slider/lib/style.css';`}
         </div>
 
         <h2>Creating a data set</h2>
-        <p>You probably want to connect this to your own data source, but for now, let&apos;s create an example data
-          set.</p>
+        <p>You probably want to connect this to your own data source, but for now, let&apos;s create an example data set.</p>
         <div style={{ overflow: 'hidden', borderRadius: 8 }}>
           <CopyBlock
             language="tsx"
@@ -140,13 +134,11 @@ const items: Tile[] = Array.from({ length: 10 }, (_, index) => ({
 
         <h2>Render methods</h2>
         <p>
-          The tile slider uses render methods allowing you to customise all visual elements. You most likely want to
-          create the
+          The tile slider uses render methods allowing you to customise all visual elements. You most likely want to create the
           `renderTile`, `renderLeftControl` and `renderRightControl` methods.
         </p>
         <p>
-          These methods can be defined outside the render function. If you do depend on data from state, context or
-          props, wrap these
+          These methods can be defined outside the render function. If you do depend on data from state, context or props, wrap these
           methods with `useCallback` for performance reasons
         </p>
         <div style={{ overflow: 'hidden', borderRadius: 8 }}>
@@ -274,7 +266,6 @@ const renderRightControl: RenderControl = ({ onClick }) => (
           />
         </div>
 
-
         <h2>Basic with custom props</h2>
         <p>A basic example with some changes to the default props.</p>
         <h3>Example</h3>
@@ -365,6 +356,7 @@ const renderRightControl: RenderControl = ({ onClick }) => (
         `}
           />
         </div>
+
         <h2>Pagination dots</h2>
         <h3>Example</h3>
         <div className="sliderContainer">
@@ -481,6 +473,54 @@ const Slider = () => {
           />
         </div>
 
+        <h2>Custom page step</h2>
+        <p>
+          You can use a number for the page step. You probably want to align this with the `overscan` prop to prevent scrolling to empty
+          space. The `overscan` prop controls how many tiles are rendered outside the viewport.
+        </p>
+        <h3>Example</h3>
+        <div className="sliderContainer">
+          <TileSlider
+            className="slider"
+            items={items}
+            tilesToShow={smallScreen ? 2 : 5}
+            spacing={16}
+            cycleMode="restart"
+            renderTile={renderTile}
+            renderLeftControl={renderLeftControl}
+            renderRightControl={renderRightControl}
+            overscan={6}
+            pageStep={6}
+          />
+        </div>
+        <h3>Code</h3>
+        <div style={{ overflow: 'hidden', borderRadius: 8 }}>
+          <CopyBlock
+            language="tsx"
+            theme={dracula}
+            highlight="13,14"
+            showLineNumbers
+            text={`const Slider = () => {
+  return (
+    <TileSlider
+      className="slider"
+      items={items}
+      tilesToShow={5}
+      spacing={16}
+      cycleMode="restart"
+      showControls={!matchMedia('(hover: none)').matches} // Hide controls on touch devices
+      renderTile={renderTile}
+      renderLeftControl={renderLeftControl}
+      renderRightControl={renderRightControl}
+      overscan={6}
+      pageStep={6}
+    />
+  );
+};
+        `}
+          />
+        </div>
+
         <h2>Single tile</h2>
         <h3>Example</h3>
         <div className="sliderContainer">
@@ -513,6 +553,83 @@ const Slider = () => {
       renderTile={renderTile}
       renderLeftControl={renderLeftControl}
       renderRightControl={renderRightControl}
+    />
+  );
+};
+        `}
+          />
+        </div>
+
+        <h2>Different transition function</h2>
+        <p>A custom slide animation function can be provided to the animationFn prop. This animation is not used when dragging.</p>
+        <h3>Example</h3>
+        <div className="sliderContainer">
+          <TileSlider
+            items={items}
+            tilesToShow={smallScreen ? 2 : 6}
+            renderTile={renderTile}
+            renderLeftControl={renderLeftControl}
+            renderRightControl={renderRightControl}
+            animationFn={easing.easeInOut}
+          />
+        </div>
+        <h3>Code</h3>
+        <div style={{ overflow: 'hidden', borderRadius: 8 }}>
+          <CopyBlock
+            language="tsx"
+            theme={dracula}
+            highlight="1,11"
+            showLineNumbers
+            text={`import { easing } from '@videodock/tile-slider';
+
+const Slider = () => {
+  return (
+    <TileSlider
+      items={items}
+      tilesToShow={4}
+      renderTile={renderTile}
+      renderLeftControl={renderLeftControl}
+      renderRightControl={renderRightControl}
+      animationFn={easing.easeInOut}
+    />
+  );
+};
+        `}
+          />
+        </div>
+
+        <h2>Disabled animations</h2>
+        <p>
+          Animations are disabled by default when the browser is configured for reduced motions (a11y). You can override this or always
+          disable animations via the `animated` prop.
+        </p>
+        <h3>Example</h3>
+        <div className="sliderContainer">
+          <TileSlider
+            items={items}
+            tilesToShow={smallScreen ? 2 : 6}
+            renderTile={renderTile}
+            renderLeftControl={renderLeftControl}
+            renderRightControl={renderRightControl}
+            animated={false}
+          />
+        </div>
+        <h3>Code</h3>
+        <div style={{ overflow: 'hidden', borderRadius: 8 }}>
+          <CopyBlock
+            language="tsx"
+            theme={dracula}
+            highlight="9"
+            showLineNumbers
+            text={`const Slider = () => {
+  return (
+    <TileSlider
+      items={items}
+      tilesToShow={4}
+      renderTile={renderTile}
+      renderLeftControl={renderLeftControl}
+      renderRightControl={renderRightControl}
+      animated={false}
     />
   );
 };
