@@ -1,0 +1,61 @@
+---
+sidebar_position: 4
+---
+
+# Page step
+
+## Single tile
+
+### Example
+
+import { TileSlider } from '../../../src';
+import { items, moreItems, renderLeftControl, renderRightControl, renderTile, renderTileWithTitle } from '../helpers';
+import '../../../src/style.css';
+
+<TileSlider tilesToShow={3} pageStep="tile" renderTile={renderTile} items={items} renderRightControl={renderRightControl} renderLeftControl={renderLeftControl} />
+
+### Code
+
+```tsx
+import { TileSlider } from '@videodock/tile-slider';
+
+const Slider = () => {
+  return (
+    <TileSlider
+      tilesToShow={3}
+      renderTile={renderTile}
+      items={items}
+      renderRightControl={renderRightControl}
+      renderLeftControl={renderLeftControl}
+      pageStep="tile"
+    />
+  );
+};
+```
+
+## Custom number of tiles
+
+You can change the `pageStep` to any number. In the example below, we set it to 16.
+
+### Example
+
+<TileSlider tilesToShow={3} pageStep={16} renderTile={renderTileWithTitle} items={moreItems} renderRightControl={renderRightControl} renderLeftControl={renderLeftControl} />
+
+### Code
+
+```tsx
+import { TileSlider } from '@videodock/tile-slider';
+
+const Slider = () => {
+  return (
+    <TileSlider
+      tilesToShow={3}
+      renderTile={renderTileWithTitle}
+      items={items}
+      renderRightControl={renderRightControl}
+      renderLeftControl={renderLeftControl}
+      pageStep={16}
+    />
+  );
+};
+```

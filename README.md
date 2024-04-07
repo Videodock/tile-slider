@@ -51,7 +51,6 @@ const App: React.FC = () => {
       tilesToShow={6}
       spacing={8}
       cycleMode={CYCLE_MODE_RESTART}
-      renderAriaLabel={(tile, total) => `Tile ${tile.index + 1} of ${total}`}
       renderLeftControl={({ onClick, disabled }) => (
         <button onClick={onClick} disabled={disabled}>
           Slide left
@@ -62,11 +61,11 @@ const App: React.FC = () => {
           Slide right
         </button>
       )}
-      renderTile={(tile, inView) => {
-        // you can do further performance optimisations for tiles that are not visible.
+      renderTile={({ item, isVisible }) => {
+        // you can do further performance optimizations for tiles that are not visible.
         return () => (
-          <div style={{ width: 350, height: 120, backgroundImage: `url(${tile.item.imageUrl})` }}>
-            <p>{tile.item.title}</p>
+          <div style={{ width: 350, height: 120, backgroundImage: `url(${item.imageUrl})` }}>
+            <p>{item.title}</p>
           </div>
         );
       }}
@@ -77,12 +76,12 @@ const App: React.FC = () => {
 export default App;
 ```
 
-## Example
+## Documentation
 
-Run the example app, which showcases all features of TileSlider:
+Run the documentation app, which showcases all features of the TileSlider package:
 
 ```shell
-cd example
+cd docs
 yarn
 yarn start
 ```

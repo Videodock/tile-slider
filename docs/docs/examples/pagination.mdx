@@ -1,0 +1,98 @@
+---
+sidebar_position: 3
+---
+
+# Pagination
+
+## Basic
+
+A simple pagination using "dots" for each page. The pages are calculated using this formula `Math.ceil(items.length / tilesToShow)`.
+
+### Example
+
+
+import { TileSlider } from '../../../src';
+import { items, manyItems, renderLeftControl, renderPagination, renderCustomPagination, renderRightControl, renderTileWithTitle } from '../helpers';
+import '../../../src/style.css';
+
+<TileSlider
+  tilesToShow={3}
+  renderTile={renderTileWithTitle}
+  items={items}
+  renderRightControl={renderRightControl}
+  renderLeftControl={renderLeftControl}
+  renderPagination={renderPagination}
+/>
+
+### Code
+
+```tsx
+import { TileSlider, type RenderPagination } from '@videodock/tile-slider';
+
+export const renderPagination: RenderPagination = (props) => {
+  const pages = Array.from({ length: props.pages }, (_, pageIndex) => pageIndex);
+
+  return (
+    <ul className="paginationDots">
+      {pages.map((page) => (
+        <li key={page} className={props.page === page ? 'activeDot' : ''} onClick={() => props.slideToPage(page)}>
+          &#9679;
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+const Slider = () => {
+  return (
+    <TileSlider
+      tilesToShow={3}
+      renderTile={renderTile}
+      items={items}
+      renderRightControl={renderRightControl}
+      renderLeftControl={renderLeftControl}
+      renderPagination={renderPagination}
+    />
+  );
+};
+```
+
+## Custom pagination
+
+You can render anything in the `renderPagination` function and leverage the props.
+
+### Example
+
+<TileSlider tilesToShow={3} renderTile={renderTileWithTitle} items={manyItems} renderRightControl={renderRightControl} renderLeftControl={renderLeftControl} renderPagination={renderCustomPagination} />
+
+### Code
+
+```tsx
+import {type RenderPagination, TileSlider} from '@videodock/tile-slider';
+
+export const renderCustomPagination: RenderPagination = (props) => {
+  return (
+    <div>
+      <button className="button button--primary margin-right--md" onClick={() => props.slideToIndex(0)}>
+        Slide 0
+      </button>
+      <button className="button button--primary" onClick={() => props.slideToIndex(100)}>
+        Slide 100
+      </button>
+    </div>
+  );
+};
+
+const Slider = () => {
+  return (
+    <TileSlider
+      tilesToShow={3}
+      renderTile={renderTile}
+      items={items}
+      renderRightControl={renderRightControl}
+      renderLeftControl={renderLeftControl}
+      renderPagination={renderCustomPagination}
+    />
+  );
+};
+```
