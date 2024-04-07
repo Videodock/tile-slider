@@ -10,7 +10,7 @@ export const CYCLE_MODE_STOP = 'stop';
 export const CYCLE_MODE_RESTART = 'restart';
 export const CYCLE_MODE_ENDLESS = 'endless';
 
-export const PREFERS_REDUCED_MOTION = !window.matchMedia('(prefers-reduced-motion)').matches;
+export const PREFERS_REDUCED_MOTION = typeof window !== 'undefined' ? !window.matchMedia('(prefers-reduced-motion)').matches : false;
 
 const DRAG_EDGE_SNAP = 50;
 const VELOCITY_SPEED = 10;
