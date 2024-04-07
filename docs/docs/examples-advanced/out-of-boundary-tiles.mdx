@@ -1,0 +1,60 @@
+---
+sidebar_position: 2
+---
+
+# Out of boundary
+
+Show tiles that are out of the boundary of the TileSlider container.
+
+## Example
+
+
+import { TileSlider } from '../../../src';
+import { items, renderLeftControl, renderRightControl, renderTile } from '../helpers';
+import '../../../src/style.css';
+
+<div className="sliderContainer">
+  <TileSlider
+    className="slider showOutOfView"
+    items={items}
+    tilesToShow={3}
+    spacing={16}
+    cycleMode="restart"
+    renderTile={renderTile}
+    renderLeftControl={renderLeftControl}
+    renderRightControl={renderRightControl}
+  />
+</div>
+
+## Code
+
+```css
+.sliderContainer {
+  overflow: hidden;
+  margin: 32px 0;
+  padding: 0 56px;
+}
+
+.showOutOfView {
+  overflow: visible !important;
+}
+```
+
+```tsx
+import { TileSlider } from '@videodock/tile-slider';
+
+const Slider = () => {
+  return (
+    <div className="sliderContainer">
+      <TileSlider
+        className="showOutOfView"
+        tilesToShow={3}
+        renderTile={renderTile}
+        items={items}
+        renderRightControl={renderRightControl}
+        renderLeftControl={renderLeftControl}
+      />
+    </div>
+  );
+};
+```

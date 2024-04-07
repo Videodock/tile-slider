@@ -1,0 +1,35 @@
+---
+sidebar_position: 5
+---
+
+# Disable animations
+
+Animations are disabled by default when the browser is configured for reduced motions (a11y).
+You can override this or always disable animations via the `animated` prop.
+
+## Example
+
+import { TileSlider } from '../../../src';
+import { items, renderLeftControl, renderRightControl, renderTile } from '../helpers';
+import '../../../src/style.css';
+
+<TileSlider tilesToShow={3} renderTile={renderTile} items={items} renderRightControl={renderRightControl} renderLeftControl={renderLeftControl} animated={false} />
+
+## Code
+
+```tsx
+import { TileSlider } from '@videodock/tile-slider';
+
+const Slider = () => {
+  return (
+    <TileSlider
+      tilesToShow={3}
+      renderTile={renderTile}
+      items={items}
+      renderRightControl={renderRightControl}
+      renderLeftControl={renderLeftControl}
+      animated={false}
+    />
+  );
+};
+```

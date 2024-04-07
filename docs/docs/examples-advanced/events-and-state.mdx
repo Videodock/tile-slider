@@ -1,0 +1,43 @@
+---
+sidebar_position: 5
+---
+
+# Events & State
+
+## Example
+
+
+import { SliderWithState } from './advanced-examples';
+
+<SliderWithState />
+
+## Code
+
+```tsx
+import { TileSlider } from '@videodock/tile-slider';
+
+const [state, setState] = useState({ index: 0, total: items.length, page: 1, pages: Math.ceil(items.length / 4) });
+
+const getCircularIndex = (index: number, length: number) => ((index % length) + length) % length;
+
+const Slider = () => {
+  return (
+    <>
+      <TileSlider
+        items={items}
+        tilesToShow={4}
+        renderTile={renderTile}
+        renderLeftControl={renderLeftControl}
+        renderRightControl={renderRightControl}
+        onSlideStart={setState}
+        onSlideEnd={setState}
+      />
+      <code>
+        State: {JSON.stringify(state, null, 2)} <br/>
+        Circular index: {getCircularIndex(state.index, state.total)}
+      </code>
+    </>
+  );
+};
+```
+

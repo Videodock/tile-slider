@@ -1,0 +1,52 @@
+---
+sidebar_position: 3
+---
+
+# Slide transition
+
+A custom slide animation function can be provided to the `animationFn` prop. This animation is not used when dragging.
+
+## Example
+
+import { TileSlider } from '../../../src';
+import { items, renderLeftControl, renderRightControl, renderTile, easeOutElastic } from '../helpers';
+import '../../../src/style.css';
+
+<TileSlider tilesToShow={3} renderTile={renderTile} items={items} renderRightControl={renderRightControl} renderLeftControl={renderLeftControl} animationFn={easeOutElastic} />
+
+## Code
+
+```tsx
+import { TileSlider } from '@videodock/tile-slider';
+
+export function easeOutElastic(currentTime: number, startValue: number, changeInValue: number, duration: number): number {
+  if (currentTime === 0) {
+    return startValue;
+  }
+  if ((currentTime /= duration) === 1) {
+    return startValue + changeInValue;
+  }
+
+  const p = duration * 0.3;
+  const s = p / 4;
+
+  return (
+    changeInValue * Math.pow(2, -10 * currentTime) * Math.sin(((currentTime * duration - s) * (2 * Math.PI)) / p) +
+    changeInValue +
+    startValue
+  );
+}
+
+const Slider = () => {
+  return (
+    <TileSlider
+      tilesToShow={3}
+      renderTile={renderTile}
+      items={items}
+      renderRightControl={renderRightControl}
+      renderLeftControl={renderLeftControl}
+      animationFn={easeOutElastic}
+    />
+  );
+};
+```

@@ -1,0 +1,47 @@
+---
+sidebar_position: 2
+---
+
+# Many, many slides!
+
+This is the basic example, but uses a data set of 5000 items.
+The performance should be the same as the basic example with 10 items.
+
+## Example
+
+import { TileSlider } from '../../../src';
+import { manyItems, renderLeftControl, renderRightControl, renderTileWithTitle } from '../helpers';
+import '../../../src/style.css';
+
+<TileSlider tilesToShow={3} renderTile={renderTileWithTitle} items={manyItems} renderRightControl={renderRightControl} renderLeftControl={renderLeftControl} />
+
+## Code
+
+```tsx
+import { TileSlider, type RenderTile, type RenderControl } from '@videodock/tile-slider';
+
+type Tile = {
+  title: string;
+  image: string;
+};
+
+const getCircularIndex = (index: number, length: number) => ((index % length) + length) % length;
+
+// create example data set with 5000 tiles
+const items: Tile[] = Array.from({ length: 5000 }, (_, index) => ({
+  title: `Tile ${index}`,
+  image: `/img/${getCircularIndex(index, 10)}.jpg`, // we re-use the same 10 images
+}));
+
+const Slider = () => {
+  return (
+    <TileSlider
+      tilesToShow={3}
+      renderTile={renderTile}
+      items={items}
+      renderRightControl={renderRightControl}
+      renderLeftControl={renderLeftControl}
+    />
+  );
+};
+```
