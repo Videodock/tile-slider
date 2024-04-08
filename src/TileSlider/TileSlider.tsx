@@ -1,10 +1,12 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { clx } from './utils';
 
 export const CYCLE_MODE_STOP = 'stop';
 export const CYCLE_MODE_RESTART = 'restart';
 export const CYCLE_MODE_ENDLESS = 'endless';
+
+export const PREFERS_REDUCED_MOTION = !window.matchMedia('(prefers-reduced-motion)').matches;
 
 export type CycleMode = 'stop' | 'restart' | 'endless';
 export type RenderTile<T> = (
@@ -30,7 +32,6 @@ export type TileSliderProps<T> = {
   cycleMode?: CycleMode;
   tilesToShow?: number;
   spacing?: number;
-  minimalTouchMovement?: number;
   showControls?: boolean;
   showDots?: boolean;
   animated?: boolean;
@@ -53,14 +54,13 @@ export type TileSliderProps<T> = {
 
 const getCircularIndex = (index: number, length: number) => ((index % length) + length) % length;
 
-const TileSlider = <T,>({
+const TileSlider = <T, > ({
   items,
   tilesToShow = 6,
   cycleMode = 'endless',
   spacing = 12,
-  minimalTouchMovement = 30,
   showControls = true,
-  animated = !window.matchMedia('(prefers-reduced-motion)').matches,
+  animated = PREFERS_REDUCED_MOTION,
   transitionTime = '0.6s',
   transitionTimingFunction = 'cubic-bezier(0.39, 0.06, 0.29, 0.96)',
   wrapWithEmptyTiles = false,
@@ -76,7 +76,7 @@ const TileSlider = <T,>({
   onSwipeEnd,
   onSlideEnd,
   overscan = tilesToShow,
-  throttleOnTransition = false,
+  throttleOnTransition = true,
 }: TileSliderProps<T>) => {
   const frameRef = useRef<HTMLUListElement>() as React.MutableRefObject<HTMLUListElement>;
   const tileWidth: number = 100 / tilesToShow;
@@ -93,8 +93,9 @@ const TileSlider = <T,>({
     slideToIndex: 0,
     transform: 0,
     transition: transitionBasis,
-    inTransition: false,
-    slideBefore: false,
+    animationRunning: false,
+    hasSlideBefore: false,
+    isDragging: false,
   });
 
   const showLeftControl: boolean = needControls && !(cycleMode === 'stop' && state.index === 0);
@@ -104,11 +105,11 @@ const TileSlider = <T,>({
    * Slide all tiles in the given direction. Currently, only 'left' or 'right' are supported.
    */
   const slide = useCallback(
-    (direction: Direction): boolean => {
-      if (throttleOnTransition && state.inTransition) return false;
+    (direction: Direction, slideAmount: number = 1): boolean => {
+      if (throttleOnTransition && state.animationRunning) return false;
 
       const directionFactor = direction === 'right' ? 1 : -1;
-      const stepCount = pageStep === 'page' ? tilesToShow : 1;
+      const stepCount = pageStep === 'page' ? tilesToShow : Math.max(slideAmount, 1);
 
       let nextIndex: number = state.index + stepCount * directionFactor;
 
@@ -130,7 +131,7 @@ const TileSlider = <T,>({
         slideToIndex: nextIndex,
         transform: movement,
         transition: transitionBasis,
-        inTransition: true,
+        animationRunning: true,
         slideBefore: true,
       }));
 
@@ -144,7 +145,7 @@ const TileSlider = <T,>({
     },
     [
       throttleOnTransition,
-      state.inTransition,
+      state.animationRunning,
       state.index,
       pageStep,
       tilesToShow,
@@ -156,70 +157,109 @@ const TileSlider = <T,>({
     ],
   );
 
-  const verticalScrollBlockedRef = useRef(false);
+  const touchDataRef = useRef({
+    origin: { x: 0, y: 0 },
+    moves: [] as { x: number; y: number; ts: number; }[],
+    scrolling: false,
+  });
 
   const handleTouchStart = useCallback(
-    (event: React.TouchEvent): void => {
-      const touchPosition: Position = {
+    (event: TouchEvent): void => {
+      touchDataRef.current.origin = {
         x: event.touches[0].clientX,
         y: event.touches[0].clientY,
       };
-
-      function handleTouchMove(this: HTMLDocument, event: TouchEvent): void {
-        const newPosition: Position = {
-          x: event.changedTouches[0].clientX,
-          y: event.changedTouches[0].clientY,
-        };
-        const movementX: number = Math.abs(newPosition.x - touchPosition.x);
-        const movementY: number = Math.abs(newPosition.y - touchPosition.y);
-
-        if ((movementX > movementY && movementX > 10) || verticalScrollBlockedRef.current) {
-          event.preventDefault();
-          event.stopPropagation();
-
-          verticalScrollBlockedRef.current = true;
-          if (onSwipeStart) onSwipeStart();
-        }
-      }
-
-      function handleTouchEnd(this: HTMLDocument, event: TouchEvent): void {
-        const newPosition = {
-          x: event.changedTouches[0].clientX,
-          y: event.changedTouches[0].clientY,
-        };
-
-        const movementX: number = Math.abs(newPosition.x - touchPosition.x);
-        const movementY: number = Math.abs(newPosition.y - touchPosition.y);
-        const direction: Direction = newPosition.x < touchPosition.x ? 'right' : 'left';
-
-        if (movementX > minimalTouchMovement && movementX > movementY) {
-          slide(direction);
-        }
-
-        cleanup();
-      }
-
-      function handleTouchCancel() {
-        cleanup();
-      }
-
-      function cleanup() {
-        document.removeEventListener('touchmove', handleTouchMove);
-        document.removeEventListener('touchend', handleTouchEnd);
-        document.removeEventListener('touchcancel', handleTouchCancel);
-
-        verticalScrollBlockedRef.current = false;
-        if (onSwipeEnd) onSwipeEnd();
-      }
-
-      document.addEventListener('touchmove', handleTouchMove, { passive: false });
-      document.addEventListener('touchend', handleTouchEnd);
-      document.addEventListener('touchcancel', handleTouchCancel);
+      touchDataRef.current.moves = [{ ...touchDataRef.current.origin, ts: Date.now() }];
     },
-    [minimalTouchMovement, slide, onSwipeStart, onSwipeEnd],
+    [],
   );
 
-  const resetAnimation = (): void => {
+  const handleTouchMove = useCallback((event: TouchEvent) => {
+    const newPosition: Position = {
+      x: event.changedTouches[0].clientX,
+      y: event.changedTouches[0].clientY,
+    };
+    const { origin, scrolling } = touchDataRef.current;
+    touchDataRef.current.moves.unshift({ ...newPosition, ts: Date.now() });
+    touchDataRef.current.moves = touchDataRef.current.moves
+    .filter(move => Date.now() - move.ts < 500);
+
+    const delta: number = newPosition.x - origin.x;
+    const movementX: number = Math.abs(newPosition.x - origin.x);
+    const movementY: number = Math.abs(newPosition.y - origin.y);
+
+    // debounce drag when the animation is running
+    if (state.animationRunning) {
+      return;
+    }
+
+    if ((movementX > movementY && movementX > 10) || scrolling) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      // only call this callback once
+      if (!scrolling) {
+        touchDataRef.current.scrolling = true;
+
+        onSwipeStart?.();
+        setState(state => ({
+          ...state,
+          isDragging: true,
+          animationRunning: false,
+          slideToIndex: state.index,
+          transform: 0,
+          transition: 'none',
+        }));
+      }
+
+      const maxDelta = frameRef.current.offsetWidth;
+
+      // move frame
+      frameRef.current.style.transform = `translateX(${Math.max(-maxDelta, Math.min(maxDelta, delta))}px)`;
+    }
+  }, [onSwipeStart, state.animationRunning]);
+
+  const handleTouchEnd = useCallback((event: TouchEvent) => {
+    const newPosition = {
+      x: event.changedTouches[0].clientX,
+      y: event.changedTouches[0].clientY,
+    };
+    touchDataRef.current.moves.unshift({ ...newPosition, ts: Date.now() });
+    touchDataRef.current.moves = touchDataRef.current.moves
+    .filter(move => Date.now() - move.ts < 500);
+
+    const { origin, moves } = touchDataRef.current;
+
+    // relative movement (velocity)
+    const distance = Math.abs(moves[0].x - moves[moves.length - 1].x);
+    const time = moves[0].ts - moves[moves.length - 1].ts;
+    const velocity = distance / time;
+
+    // total movement
+    const movementX: number = Math.abs(newPosition.x - origin.x);
+    const movementY: number = Math.abs(newPosition.y - origin.y);
+    const direction: Direction = newPosition.x < origin.x ? 'right' : 'left';
+
+    // tiles moved
+    const tileWidth = frameRef.current.offsetWidth / tilesToShow;
+    const tilesMoved = Math.ceil(movementX / tileWidth);
+
+    // we slide when either the movement was larger than 100px or the velocity greater than 0.2
+    if ((movementX > 100 || velocity > 0.2) && movementX > movementY) {
+      slide(direction, tilesMoved);
+    } else {
+      // reset the drag movement with an animation
+      setState(state => ({ ...state, transform: 0, transition: `transform 0.1s ${transitionTimingFunction}` }));
+      frameRef.current.style.transform = `translateX(0px)`;
+    }
+
+    touchDataRef.current.scrolling = false;
+    setState(state => ({ ...state, isDragging: false }));
+    if (onSwipeEnd) onSwipeEnd();
+  }, [onSwipeEnd, slide, tilesToShow, transitionTimingFunction]);
+
+  // Run code after the slide animation to set the new index
+  const postAnimationCleanup = (): void => {
     let resetIndex: number = state.slideToIndex;
 
     if (cycleMode !== CYCLE_MODE_ENDLESS) {
@@ -239,7 +279,7 @@ const TileSlider = <T,>({
       index: resetIndex,
       transform: 0,
       transition: 'none',
-      inTransition: false,
+      animationRunning: false,
       slideBefore: true,
     }));
 
@@ -248,9 +288,26 @@ const TileSlider = <T,>({
 
   const handleTransitionEnd = (event: React.TransitionEvent<HTMLUListElement>) => {
     if (event.target === frameRef.current) {
-      resetAnimation();
+      postAnimationCleanup();
     }
   };
+
+  useEffect(() => {
+    const frame = frameRef.current;
+
+    frame.addEventListener('touchstart', handleTouchStart);
+    frame.addEventListener('touchmove', handleTouchMove, { passive: false });
+    frame.addEventListener('touchend', handleTouchEnd);
+    frame.addEventListener('touchcancel', handleTouchEnd);
+
+    return () => {
+      frame.removeEventListener('touchstart', handleTouchStart);
+      frame.removeEventListener('touchmove', handleTouchMove);
+      frame.removeEventListener('touchend', handleTouchEnd);
+      frame.removeEventListener('touchcancel', handleTouchEnd);
+    }
+
+  }, [handleTouchEnd, handleTouchMove, handleTouchStart]);
 
   const ulStyle = {
     transform: `translateX(${state.transform}%)`,
@@ -265,7 +322,7 @@ const TileSlider = <T,>({
     willChange: 'transform',
   } as React.CSSProperties;
 
-  const leftControlDisabled = (cycleMode === 'stop' && state.index === 0) || !state.slideBefore;
+  const leftControlDisabled = (cycleMode === 'stop' && state.index === 0) || !state.hasSlideBefore;
   const rightControlDisabled = cycleMode === 'stop' && state.index === items.length - tilesToShow;
 
   const paginationDots = () => {
@@ -290,7 +347,7 @@ const TileSlider = <T,>({
         <li
           className="TileSlider-tile"
           key={key}
-          aria-label={renderAriaLabel && renderAriaLabel(item, index, key, items.length)}
+          aria-label={renderAriaLabel?.(item, index, key, items.length)}
           style={{
             width: `${tileWidth}%`,
             paddingLeft: spacing / 2,
@@ -309,8 +366,8 @@ const TileSlider = <T,>({
     const lastInView = overscan * 2 + state.slideToIndex;
 
     for (let renderIndex = state.index; renderIndex < end; renderIndex++) {
-      const isInView = renderIndex >= firstInView && renderIndex < lastInView;
-      // To render the item in the correct order, we need a index that reflects the first item that is visible in the viewport relative to the current renderIndex.
+      const isInView = (renderIndex >= firstInView && renderIndex < lastInView) || state.animationRunning || state.isDragging;
+      // To render the item in the correct order, we need an index that reflects the first item that is visible in the viewport relative to the current renderIndex.
       const indexWithoutOverscan = renderIndex - overscan;
 
       const indexOfItem = getCircularIndex(indexWithoutOverscan, items.length);
@@ -322,7 +379,7 @@ const TileSlider = <T,>({
         <li
           className="TileSlider-tile"
           key={key}
-          aria-label={renderAriaLabel && renderAriaLabel(item, indexOfItem, key, items.length)}
+          aria-label={renderAriaLabel?.(item, indexOfItem, key, items.length)}
           style={{
             width: `${tileWidth}%`,
             paddingLeft: spacing / 2,
@@ -352,7 +409,6 @@ const TileSlider = <T,>({
         ref={frameRef}
         className="TileSlider-container"
         style={ulStyle}
-        onTouchStart={isMultiPage ? handleTouchStart : undefined}
         onTransitionEnd={handleTransitionEnd}
       >
         {wrapWithEmptyTiles ? (
