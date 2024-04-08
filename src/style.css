@@ -14,6 +14,7 @@
 .TileSlider-list > li {
     display: inline-block;
     box-sizing: border-box;
+    vertical-align: top;
 }
 
 .TileSlider-leftControl {
