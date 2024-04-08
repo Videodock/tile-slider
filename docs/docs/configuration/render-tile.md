@@ -4,7 +4,12 @@ sidebar_position: 2
 
 # Render tile
 
-The `renderTile` prop is required because this will render your tile.
+The `renderTile` render function is called for each tile rendered in the slider.
+Use the `props.item` property to access the data off the current item in the `TileSlider#items` array. 
+
+For the best performance, it's advised to keep the tile component simple.
+
+The `renderTile` prop is required.
 
 ## Example
 

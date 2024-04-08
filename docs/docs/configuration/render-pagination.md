@@ -4,29 +4,39 @@ sidebar_position: 4
 
 # Render pagination
 
-The `renderPagination` prop is required because this will render your tile.
+The `renderPagination` prop can be used to render a component that receives pagination data. 
 
 ## Example
 
 ```tsx
-import type { RenderTile } from './TileSlider';
+import type { RenderPagination } from './TileSlider';
 
-const renderTile: RenderTile<Tile> = ({ item, isVisible }) => (
-  <div className={`exampleTile ${!isVisible ? 'outOfView' : ''}`}>
-    <img src={item.image} alt={item.title} />
-  </div>
-);
+export const renderPagination: RenderPagination = ({ page, pages, slideToPage }) => {
+  const items = Array.from({ length: props.pages }, (_, pageIndex) => pageIndex);
+
+  return (
+    <ul className="paginationDots">
+      {items.map((current) => (
+        <li key={current} className={page === current ? 'activeDot' : ''} onClick={() => slideToPage(current)}>
+          &#9679;
+        </li>
+      ))}
+    </ul>
+  );
+};
 ```
 
 ## Props
 
-The `renderTile` function receives the following props:
+The `renderPagination` function receives the following props:
 
-| Name      | Type                                     | Description                                           |
-|-----------|------------------------------------------|-------------------------------------------------------|
-| item      | `T`                                      | The item rendered for this tile                       |
-| itemIndex | `number`                                 | The index used to address the item in the items array |
-| index     | `number`                                 | The index relative to the current rendered index      |
-| isVisible | `boolean`                                | `true` when the tile is visible (inside viewport)     |
-| slide     | `(direction: 'left' \| 'right') => void` | Call this function to slide left or right             |
+| Name         | Type                                     | Description                               |
+|--------------|------------------------------------------|-------------------------------------------|
+| page         | `number`                                 | The current page index                    |
+| pages        | `number`                                 | The number of pages                       |
+| index        | `number`                                 | The current slide index                   |
+| total        | `number`                                 | The total slides                          |
+| slideToPage  | `(page: number) => void`                 | Callback to slide to the given page index |
+| slideToIndex | `(index: number) => void`                | Callback to slide to the given tile index |
+| slide        | `(direction: 'left' \| 'right') => void` | Callback to slide left or right           |
 
