@@ -34,18 +34,18 @@ jobs:
         run: |
           yarn install
           yarn build
-      - name: Install and build example app
+      - name: Install and build docs
         run: |
           yarn install
           yarn build
         env:
-          APP_BASE: /tile-slider/
-        working-directory: example
+          APP_URL: /tile-slider/
+        working-directory: docs
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload entire repository
-          path: 'example/dist'
+          path: 'docs/build'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
