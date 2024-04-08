@@ -37,7 +37,7 @@ Starting from version `1.0.1`, it's crucial to include the `.css` import explici
 
 ```tsx
 import { TileSlider, CYCLE_MODE_RESTART } from '@videodock/tile-slider';
-import '@videodock/tile-slider/lib/TileSlider.css';
+import '@videodock/tile-slider/lib/style.css';
 
 type Data = { title: string; imageUrl: string };
 
