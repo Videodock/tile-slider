@@ -1,4 +1,5 @@
 import React from 'react';
+import siteConfig from '@generated/docusaurus.config';
 
 import { RenderControl, RenderPagination, RenderTile } from '../../src';
 
@@ -92,7 +93,7 @@ export const makeItems = (length: number): Tile[] =>
 
     return {
       title: `Tile ${index}`,
-      image: images[imageIndex] ? `/img/${images[getCircularIndex(imageIndex, 10)]}` : '',
+      image: images[imageIndex] ? `${siteConfig.baseUrl}img/${images[getCircularIndex(imageIndex, 10)]}` : '',
     };
   });
 
