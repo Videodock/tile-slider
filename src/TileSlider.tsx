@@ -150,7 +150,7 @@ export const TileSlider = <T,>({
     const page = Math.floor(getCircularIndex(index, items.length) / tilesToShow);
 
     if (!animated) {
-      setState(state => ({ index, page, hasSlideBefore: true }));
+      setState((state) => ({ index, page, hasSlideBefore: true }));
       frameRef.current.style.transform = `translateX(${-responsiveTileWidth * index}%)`;
       onSlideEnd?.({
         index: index,
@@ -346,7 +346,11 @@ export const TileSlider = <T,>({
     const isVisible = index >= state.index && index < state.index + tilesToShow;
 
     return (
-      <li style={{ width: `${responsiveTileWidth}%`, paddingLeft: spacing / 2, paddingRight: spacing / 2 }} key={index}>
+      <li
+        style={{ width: `${responsiveTileWidth}%`, paddingLeft: spacing / 2, paddingRight: spacing / 2 }}
+        className={isVisible ? 'TileSlider--visible' : 'TileSlider--hidden'}
+        key={index}
+      >
         {renderTile({ item: items[itemIndex], itemIndex, isVisible, index, slide })}
       </li>
     );
@@ -379,7 +383,15 @@ export const TileSlider = <T,>({
           })}
         </div>
       )}
-      {renderPagination?.({ index: state.index, total: items.length, page: state.page, pages, slide, slideToPage, slideToIndex })}
+      {renderPagination?.({
+        index: state.index,
+        total: items.length,
+        page: state.page,
+        pages,
+        slide,
+        slideToPage,
+        slideToIndex,
+      })}
     </div>
   );
 };
