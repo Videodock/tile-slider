@@ -1,5 +1,7 @@
 # Tile Slider
 
+> See the [v1 branch](https://github.com/Videodock/tile-slider/tree/v1) for the previous version
+
 ## Introduction
 
 `@videodock/tile-slider` is a React component of a performant and accessible slider for your React project.
