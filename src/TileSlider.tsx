@@ -350,6 +350,7 @@ export const TileSlider = <T,>({
         style={{ width: `${responsiveTileWidth}%`, paddingLeft: spacing / 2, paddingRight: spacing / 2 }}
         className={isVisible ? 'TileSlider--visible' : 'TileSlider--hidden'}
         key={index}
+        aria-hidden={!isVisible}
       >
         {renderTile({ item: items[itemIndex], itemIndex, isVisible, index, slide })}
       </li>
