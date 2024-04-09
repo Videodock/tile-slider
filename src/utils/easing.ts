@@ -6,6 +6,12 @@ export const easeOut: AnimationFn = (currentTime, startValue, changeInValue, dur
   return changeInValue * (currentTime * currentTime * currentTime + 1) + startValue;
 };
 
+export const easeOutQuartic: AnimationFn = (currentTime, startValue, changeInValue, duration) => {
+  currentTime /= duration;
+  currentTime--;
+  return -changeInValue * (currentTime * currentTime * currentTime * currentTime - 1) + startValue;
+};
+
 export const easeInOut: AnimationFn = (currentTime, startValue, changeInValue, duration) => {
   currentTime /= duration / 2;
   if (currentTime < 1) {

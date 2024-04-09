@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useEventCallback } from './hooks/useEventCallback';
-import { AnimationFn, easeOut } from './utils/easing';
+import { AnimationFn, easeOut, easeOutQuartic } from './utils/easing';
 import { getCircularIndex } from './utils/math';
 import { clx } from './utils/clx';
 import { getVelocity, Position, registerMove, TouchMoves } from './utils/drag';
@@ -141,7 +141,7 @@ export const TileSlider = <T,>({
     return transform ? parseInt(transform) : 0;
   });
 
-  const handleSnapping = useEventCallback((index: number, animationFn: AnimationFn) => {
+  const handleSnapping = useEventCallback((index: number, animationFn: AnimationFn, duration = SNAPPING_DAMPING) => {
     const tileWidth = frameRef.current.offsetWidth / tilesToShow;
     const from = sliderDataRef.current.position;
     const to = -(index * tileWidth);
@@ -163,7 +163,7 @@ export const TileSlider = <T,>({
 
     const snappingDampening = () => {
       const currentTime = Date.now() - startTime;
-      const position = animationFn(currentTime, from, change, SNAPPING_DAMPING);
+      const position = animationFn(currentTime, from, change, duration);
       const index = calculateIndex();
 
       sliderDataRef.current.position = position;
@@ -206,7 +206,11 @@ export const TileSlider = <T,>({
     const tileWidth = frameRef.current.offsetWidth / tilesToShow;
     const targetIndex = Math[startVelocity > 0 ? 'floor' : 'ceil']((velocityTargetPosition / tileWidth) * -1);
 
-    handleSnapping(targetIndex, easeOut);
+    // Animation duration based on the speed
+    const extraDuration = Math.log(Math.abs(startVelocity) + 1) * 20;
+    const totalDuration = SNAPPING_DAMPING + extraDuration;
+
+    handleSnapping(targetIndex, easeOutQuartic, totalDuration);
   });
 
   const slideToIndex = useCallback(
