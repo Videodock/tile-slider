@@ -204,7 +204,7 @@ export const TileSlider = <T,>({
     const velocityTargetPosition = startPosition + startVelocity * VELOCITY_SPEED;
 
     const tileWidth = frameRef.current.offsetWidth / tilesToShow;
-    const targetIndex = Math.round((velocityTargetPosition / tileWidth) * -1);
+    const targetIndex = Math[startVelocity > 0 ? 'floor' : 'ceil']((velocityTargetPosition / tileWidth) * -1);
 
     handleSnapping(targetIndex, easeOut);
   });
