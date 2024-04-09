@@ -10,7 +10,6 @@ The `useResponsiveSize` hook is optimized and only re-renders when the current b
 
 ## Example
 
-
 import { ResponsiveSlider } from './advanced-examples';
 
 <ResponsiveSlider />
@@ -21,7 +20,7 @@ import { ResponsiveSlider } from './advanced-examples';
 import { TileSlider, useResponsiveSize } from '@videodock/tile-slider';
 
 const Slider = () => {
-  const [tilesToShow] = useResponsiveSize([{ xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }]);
+  const [tilesToShow] = useResponsiveSize([{ xs: 2, sm: 2, md: 3, lg: 4, xl: 5 }]);
 
   return (
     <TileSlider
