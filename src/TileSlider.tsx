@@ -13,8 +13,8 @@ export const CYCLE_MODE_ENDLESS = 'endless';
 export const PREFERS_REDUCED_MOTION = typeof window !== 'undefined' ? !window.matchMedia('(prefers-reduced-motion)').matches : false;
 
 const DRAG_EDGE_SNAP = 50;
-const VELOCITY_SPEED = 10;
-const SNAPPING_DAMPING = 300;
+const VELOCITY_SPEED = 50;
+const SNAPPING_DAMPING = 2000;
 
 export type Direction = 'left' | 'right';
 export type CycleMode = 'stop' | 'restart' | 'endless';
