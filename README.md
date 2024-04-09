@@ -1,17 +1,31 @@
 # Tile Slider
 
-> See the [v1 branch](https://github.com/Videodock/tile-slider/tree/v1) for the previous version
+Performant and accessible React slider with virtualization.
+
+<img src="img/tile-slider.png" alt="TileSlider component on a dark background">
 
 ## Introduction
 
-`@videodock/tile-slider` is a React component of a performant and accessible slider for your React project.
-It only renders the visible tiles, meaning that you can have thousands of items and still get a good performing site and animation.
+`@videodock/tile-slider` is a React component of a performant and accessible slider written in React.
+It only renders the visible tiles, meaning that you can have thousands of items and still get a good performance.
 
-It only needs React... no other dependencies needed!
+TileSlider is fully written using React and doesn't have dependencies. 
 
-Checkout the demo page for examples
+## Documentation
 
-- https://videodock.github.io/tile-slider/
+Visit the [documentation](https://videodock.github.io/tile-slider/) with examples
+
+Using v1, see the [v1 branch](https://github.com/Videodock/tile-slider/tree/v1).
+
+## Features
+
+- Virtualized rendering
+- Custom pagination
+- Custom controls
+- Custom slide transition
+- Fully responsive using CSS
+- Accessible
+- First-class TypeScript support 
 
 ## Requirements
 
@@ -28,12 +42,10 @@ $ npm install @videodock/tile-slider
 $ pnpm install @videodock/tile-slider
 ```
 
-## Usage
+## Example usage
 
-This section will be extended. For now, please see the below example which uses all the supported features.
-
-#### Important: .css file import requirement (version 1.0.1 and above)
-Starting from version `1.0.1`, it's crucial to include the `.css` import explicitly, as demonstrated in the example below:
+> Important: .css file import requirement (version 1.0.1 and above)
+> Starting from version `1.0.1`, it's crucial to include the `.css` import explicitly, as demonstrated in the example below:
 
 ```tsx
 import { TileSlider, CYCLE_MODE_RESTART } from '@videodock/tile-slider';
