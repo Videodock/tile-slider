@@ -18,8 +18,8 @@
 }
 
 .TileSlider-leftControl {
-    left: 0;
     position: absolute;
+    left: 1px; /* Fixes layout shifting issues when focussed on Android Talkback */
     top: 50%;
     transform: translateY(-100%);
     z-index: 1;
@@ -27,7 +27,7 @@
 
 .TileSlider-rightControl {
     position: absolute;
-    right: 0;
+    right: 1px;  /* Fixes layout shifting issues when focussed on Android Talkback */
     top: 50%;
     transform: translateY(-100%);
 }
