@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useEventCallback } from './hooks/useEventCallback';
-import { AnimationFn, easeOut, easeOutQuartic } from './utils/easing';
+import { AnimationFn, easeInOutCubic, easeOut, easeOutQuartic } from './utils/easing';
 import { getCircularIndex } from './utils/math';
 import { clx } from './utils/clx';
 import { getVelocity, Position, registerMove, TouchMoves } from './utils/drag';
@@ -13,9 +13,8 @@ export const CYCLE_MODE_ENDLESS = 'endless';
 export const PREFERS_REDUCED_MOTION = typeof window !== 'undefined' ? !window.matchMedia('(prefers-reduced-motion)').matches : false;
 
 const DRAG_EDGE_SNAP = 50;
-const VELOCITY_SPEED = 10;
 const SLIDE_SNAPPING_DAMPING = 500;
-const DRAG_SNAPPING_DAMPING = 1000;
+const DRAG_SNAPPING_DAMPING = 1500;
 
 export type Direction = 'left' | 'right';
 export type CycleMode = 'stop' | 'restart' | 'endless';
@@ -218,22 +217,76 @@ export const TileSlider = <T,>({
   }, [responsiveTileWidth, tilesToShow]);
 
   const handleVelocity = useEventCallback(() => {
-    const startVelocity = sliderDataRef.current.velocity;
-    const startPosition = sliderDataRef.current.position;
-    const velocityTargetPosition = startPosition + startVelocity * VELOCITY_SPEED;
+    const startTime = Date.now();
+    const startVelocity = sliderDataRef.current.velocity * 16;
+    const tileWidth = frameRef.current.offsetWidth / tilesToShow;
 
-    if (startVelocity > -10 && startVelocity < 10) {
+    // Animation duration based on the speed
+    const extraDuration = Math.log(Math.abs(startVelocity) + 1) * DRAG_SNAPPING_DAMPING;
+    const totalDuration = DRAG_SNAPPING_DAMPING + extraDuration;
+    const blendDuration = Math.round(totalDuration / 2);
+
+    // Return the slider to the current position
+    if (startVelocity > -1 && startVelocity < 1) {
       return handleSnapping(state.index, easeOutQuartic, 500);
     }
 
-    const tileWidth = frameRef.current.offsetWidth / tilesToShow;
-    const targetIndex = Math[startVelocity > 0 ? 'floor' : 'ceil']((velocityTargetPosition / tileWidth) * -1);
+    // Consider a velocity between -20 and 20 to be a swipe (snap to prev/next index)
+    if (startVelocity > -20 && startVelocity < 20) {
+      return handleSnapping(state.index + (startVelocity > 0 ? -1 : 1), easeOutQuartic, DRAG_SNAPPING_DAMPING);
+    }
 
-    // Animation duration based on the speed
-    const extraDuration = Math.log(Math.abs(startVelocity) + 1) * (DRAG_SNAPPING_DAMPING / 5);
-    const totalDuration = DRAG_SNAPPING_DAMPING + extraDuration;
+    cancelAnimationFrame(sliderDataRef.current.animationId);
 
-    handleSnapping(targetIndex, easeOutQuartic, totalDuration);
+    // @todo set `toIndex` based on the velocity?
+    setState((state) => ({ ...state, fromIndex: state.index, sliding: true }));
+
+    const velocityDampening = () => {
+      const currentTime = Date.now() - startTime;
+      const position = easeOutQuartic(currentTime, startVelocity, -startVelocity, totalDuration);
+      const currentIndex = calculateIndex();
+      const page = Math.floor(getCircularIndex(currentIndex, items.length) / tilesToShow);
+
+      sliderDataRef.current.position += position;
+
+      if (currentTime >= totalDuration - blendDuration) {
+        const targetPosition = -(currentIndex * tileWidth);
+        const change = targetPosition - sliderDataRef.current.position;
+        const currentBlendTime = Date.now() - (startTime + totalDuration - blendDuration);
+
+        sliderDataRef.current.position = easeInOutCubic(currentBlendTime, sliderDataRef.current.position, change, blendDuration);
+      }
+
+      // interrupt
+      if (sliderDataRef.current.scrolling) return;
+
+      frameRef.current.style.transform = `translateX(${sliderDataRef.current.position}px)`;
+
+      if (currentTime <= totalDuration) {
+        sliderDataRef.current.animationId = requestAnimationFrame(velocityDampening);
+      } else {
+        frameRef.current.style.transform = `translateX(${-responsiveTileWidth * currentIndex}%)`;
+        onSlideEnd?.({
+          index: currentIndex,
+          total: items.length,
+          page,
+          pages,
+        });
+        setState((state) => ({
+          ...state,
+          index: currentIndex,
+          page,
+          sliding: false,
+        }));
+      }
+
+      if (sliderDataRef.current.lastRenderedIndex !== currentIndex) {
+        sliderDataRef.current.lastRenderedIndex = currentIndex;
+        setState((state) => ({ ...state, index: currentIndex, page }));
+      }
+    };
+
+    sliderDataRef.current.animationId = requestAnimationFrame(velocityDampening);
   });
 
   const slideToIndex = useCallback(
@@ -311,7 +364,7 @@ export const TileSlider = <T,>({
         return;
       }
 
-      if ((movementX > movementY) || scrolling) {
+      if (movementX > movementY || scrolling) {
         event.preventDefault();
         event.stopPropagation();
 
