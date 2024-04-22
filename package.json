@@ -34,7 +34,7 @@
     "eslint-plugin-rulesdir": "^0.2.2",
     "postcss": "^8.4.36",
     "prettier": "^2.8.8",
-    "rollup": "^4.13.0",
+    "rollup": "^4.16.1",
     "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-import-css": "^3.5.0",
     "rollup-plugin-peer-deps-external": "^2.2.4",
