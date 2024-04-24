@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 import { useEventCallback } from './hooks/useEventCallback';
 import { AnimationFn, easeInOutCubic, easeOut, easeOutQuartic } from './utils/easing';
@@ -32,6 +32,7 @@ export type ControlProps = {
 };
 export type PaginationProps = {
   index: number;
+  itemIndex: number;
   total: number;
   page: number;
   pages: number;
@@ -65,26 +66,35 @@ export type TileSliderProps<T> = {
   overscan?: number;
 };
 
-export const TileSlider = <T,>({
-  items,
-  tilesToShow = 6,
-  cycleMode = 'endless',
-  spacing = 12,
-  showControls = true,
-  animated = PREFERS_REDUCED_MOTION,
-  animationFn = easeOut,
-  pageStep = 'page',
-  renderTile,
-  renderLeftControl,
-  renderRightControl,
-  renderPagination,
-  className,
-  onSwipeStart,
-  onSwipeEnd,
-  onSlideStart,
-  onSlideEnd,
-  overscan = tilesToShow,
-}: TileSliderProps<T>) => {
+export type TileSliderRef = {
+  slide: (direction: Direction) => void;
+  slideToIndex: (index: number, closest?: boolean) => void;
+  slideToPage: (page: number) => void;
+}
+
+const TileSliderComponent = <T,>(
+  {
+    items,
+    tilesToShow = 6,
+    cycleMode = 'endless',
+    spacing = 12,
+    showControls = true,
+    animated = PREFERS_REDUCED_MOTION,
+    animationFn = easeOut,
+    pageStep = 'page',
+    renderTile,
+    renderLeftControl,
+    renderRightControl,
+    renderPagination,
+    className,
+    onSwipeStart,
+    onSwipeEnd,
+    onSlideStart,
+    onSlideEnd,
+    overscan = tilesToShow,
+  }: TileSliderProps<T>,
+  ref: React.ForwardedRef<TileSliderRef>,
+) => {
   const frameRef = useRef<HTMLUListElement>() as React.MutableRefObject<HTMLUListElement>;
   const gesturesRef = useRef<HTMLDivElement>() as React.MutableRefObject<HTMLDivElement>;
   const responsiveTileWidth = 100 / tilesToShow;
@@ -129,8 +139,12 @@ export const TileSlider = <T,>({
     animationId: 0,
   });
 
+  const getSliderWidth = useEventCallback(() => {
+    return parseFloat(getComputedStyle(frameRef.current).width);
+  });
+
   const calculateIndex = useCallback(() => {
-    const tileWidth = frameRef.current.offsetWidth / tilesToShow;
+    const tileWidth = getSliderWidth() / tilesToShow;
     let index = Math.round((sliderDataRef.current.position / tileWidth) * -1);
 
     if (!isMultiPage) {
@@ -142,7 +156,7 @@ export const TileSlider = <T,>({
     }
 
     return index;
-  }, [cycleMode, isMultiPage, items.length, tilesToShow]);
+  }, [cycleMode, getSliderWidth, isMultiPage, items.length, tilesToShow]);
 
   const getSliderPosition = useEventCallback(() => {
     const transform = getComputedStyle(frameRef.current).transform?.split(', ')[4];
@@ -151,8 +165,9 @@ export const TileSlider = <T,>({
   });
 
   const handleSnapping = useEventCallback((index: number, animationFn: AnimationFn, duration = SLIDE_SNAPPING_DAMPING) => {
-    const tileWidth = frameRef.current.offsetWidth / tilesToShow;
-    const from = sliderDataRef.current.position;
+    const tileWidth = getSliderWidth() / tilesToShow;
+    const from = getSliderPosition();
+    const relativeToPosition = -responsiveTileWidth * index;
     const to = -(index * tileWidth);
     const change = to - from;
     const startTime = Date.now();
@@ -160,9 +175,10 @@ export const TileSlider = <T,>({
 
     if (!animated) {
       setState((state) => ({ ...state, index, page, hasSlideBefore: true, sliding: false }));
-      frameRef.current.style.transform = `translateX(${-responsiveTileWidth * index}%)`;
+      frameRef.current.style.transform = `translateX(${relativeToPosition}%)`;
       onSlideEnd?.({
         index: index,
+        itemIndex: getCircularIndex(index, items.length),
         total: items.length,
         page,
         pages,
@@ -187,9 +203,10 @@ export const TileSlider = <T,>({
       if (currentTime <= duration) {
         sliderDataRef.current.animationId = requestAnimationFrame(snappingDampening);
       } else {
-        frameRef.current.style.transform = `translateX(${-responsiveTileWidth * currentIndex}%)`;
+        frameRef.current.style.transform = `translateX(${relativeToPosition}%)`;
         onSlideEnd?.({
           index: currentIndex,
+          itemIndex: getCircularIndex(currentIndex, items.length),
           total: items.length,
           page,
           pages,
@@ -219,10 +236,10 @@ export const TileSlider = <T,>({
   const handleVelocity = useEventCallback(() => {
     const startTime = Date.now();
     const startVelocity = sliderDataRef.current.velocity * 16;
-    const tileWidth = frameRef.current.offsetWidth / tilesToShow;
+    const tileWidth = getSliderWidth() / tilesToShow;
 
     // Animation duration based on the speed
-    const extraDuration = Math.log(Math.abs(startVelocity) + 1) * DRAG_SNAPPING_DAMPING;
+    const extraDuration = Math.pow(Math.abs(startVelocity), 2) / 5;
     const totalDuration = DRAG_SNAPPING_DAMPING + extraDuration;
     const blendDuration = Math.round(totalDuration / 2);
 
@@ -233,7 +250,7 @@ export const TileSlider = <T,>({
 
     // Consider a velocity between -20 and 20 to be a swipe (snap to prev/next index)
     if (startVelocity > -20 && startVelocity < 20) {
-      return handleSnapping(state.index + (startVelocity > 0 ? -1 : 1), easeOutQuartic, DRAG_SNAPPING_DAMPING);
+      return handleSnapping(state.index + (startVelocity > 0 ? -1 : 1), easeOutQuartic, SLIDE_SNAPPING_DAMPING);
     }
 
     cancelAnimationFrame(sliderDataRef.current.animationId);
@@ -268,6 +285,7 @@ export const TileSlider = <T,>({
         frameRef.current.style.transform = `translateX(${-responsiveTileWidth * currentIndex}%)`;
         onSlideEnd?.({
           index: currentIndex,
+          itemIndex: getCircularIndex(currentIndex, items.length),
           total: items.length,
           page,
           pages,
@@ -290,18 +308,29 @@ export const TileSlider = <T,>({
   });
 
   const slideToIndex = useCallback(
-    (index: number) => {
-      const page = Math.floor(getCircularIndex(state.index, items.length) / tilesToShow);
+    (index: number, closest = false) => {
+      const itemIndex = getCircularIndex(state.index, items.length);
+      const page = Math.floor(itemIndex / tilesToShow);
+
+      if (closest) {
+        const toItemIndex = getCircularIndex(index, items.length);
+        const delta = toItemIndex - itemIndex;
+        index = state.index + delta;
+      }
+
+      if (!isMultiPage) return;
+
       setState((state) => ({ ...state, page }));
       onSlideStart?.({
         index: index,
+        itemIndex,
         total: items.length,
         page,
         pages,
       });
       handleSnapping(index, stableAnimationFn);
     },
-    [handleSnapping, items.length, onSlideStart, pages, stableAnimationFn, state.index, tilesToShow],
+    [handleSnapping, isMultiPage, items.length, onSlideStart, pages, stableAnimationFn, state.index, tilesToShow],
   );
 
   const slideToPage = useCallback(
@@ -325,6 +354,14 @@ export const TileSlider = <T,>({
     [slideToIndex, state.index, stepCount],
   );
 
+  useImperativeHandle(ref, () => {
+    return {
+      slide,
+      slideToPage,
+      slideToIndex,
+    };
+  }, [slide, slideToIndex, slideToPage]);
+
   const handleTouchStart = useCallback(
     (event: TouchEvent): void => {
       sliderDataRef.current.origin = {
@@ -340,7 +377,7 @@ export const TileSlider = <T,>({
       sliderDataRef.current.cancelled = false;
 
       onSwipeStart?.();
-      onSlideStart?.({ index: state.index, page: state.page, pages, total: items.length });
+      onSlideStart?.({ index: state.index, itemIndex: getCircularIndex(state.index, items.length), page: state.page, pages, total: items.length });
     },
     [getSliderPosition, items.length, onSlideStart, onSwipeStart, pages, state.index, state.page],
   );
@@ -398,9 +435,10 @@ export const TileSlider = <T,>({
       // snap to edges when there is nothing to scroll
       if (!isMultiPage) delta = Math.max(-DRAG_EDGE_SNAP, Math.min(DRAG_EDGE_SNAP, delta));
 
+      sliderDataRef.current.scrolling = false;
       sliderDataRef.current.velocity = 0;
 
-      if (sliderDataRef.current.cancelled) {
+      if (sliderDataRef.current.cancelled || !isMultiPage) {
         return handleVelocity();
       }
 
@@ -411,7 +449,6 @@ export const TileSlider = <T,>({
         sliderDataRef.current.velocity = velocity;
       }
 
-      sliderDataRef.current.scrolling = false;
       onSwipeEnd?.();
 
       handleVelocity();
@@ -482,6 +519,7 @@ export const TileSlider = <T,>({
       )}
       {renderPagination?.({
         index: state.index,
+        itemIndex: getCircularIndex(state.index, items.length),
         total: items.length,
         page: state.page,
         pages,
@@ -492,3 +530,5 @@ export const TileSlider = <T,>({
     </div>
   );
 };
+
+export const TileSlider = forwardRef(TileSliderComponent);
