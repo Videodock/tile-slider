@@ -1,7 +1,7 @@
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 import { useEventCallback } from './hooks/useEventCallback';
-import { AnimationFn, easeInOutCubic, easeOut, easeOutQuartic } from './utils/easing';
+import { AnimationFn, easeOut, easeOutQuartic } from './utils/easing';
 import { getCircularIndex } from './utils/math';
 import { clx } from './utils/clx';
 import { getVelocity, Position, registerMove, TouchMoves } from './utils/drag';
@@ -70,7 +70,7 @@ export type TileSliderRef = {
   slide: (direction: Direction) => void;
   slideToIndex: (index: number, closest?: boolean) => void;
   slideToPage: (page: number) => void;
-}
+};
 
 const TileSliderComponent = <T,>(
   {
@@ -143,20 +143,23 @@ const TileSliderComponent = <T,>(
     return parseFloat(getComputedStyle(frameRef.current).width);
   });
 
-  const calculateIndex = useCallback(() => {
-    const tileWidth = getSliderWidth() / tilesToShow;
-    let index = Math.round((sliderDataRef.current.position / tileWidth) * -1);
+  const calculateIndex = useCallback(
+    (roundingFn = Math.round) => {
+      const tileWidth = getSliderWidth() / tilesToShow;
+      let index = roundingFn((sliderDataRef.current.position / tileWidth) * -1);
 
-    if (!isMultiPage) {
-      index = 0;
-    }
+      if (!isMultiPage) {
+        index = 0;
+      }
 
-    if (cycleMode === 'stop') {
-      index = Math.max(0, Math.min(items.length - tilesToShow, index));
-    }
+      if (cycleMode === 'stop') {
+        index = Math.max(0, Math.min(items.length - tilesToShow, index));
+      }
 
-    return index;
-  }, [cycleMode, getSliderWidth, isMultiPage, items.length, tilesToShow]);
+      return index;
+    },
+    [cycleMode, getSliderWidth, isMultiPage, items.length, tilesToShow],
+  );
 
   const getSliderPosition = useEventCallback(() => {
     const transform = getComputedStyle(frameRef.current).transform?.split(', ')[4];
@@ -238,48 +241,66 @@ const TileSliderComponent = <T,>(
     const startVelocity = sliderDataRef.current.velocity * 16;
     const tileWidth = getSliderWidth() / tilesToShow;
 
+    // Return the slider to the current position
+    if (Math.abs(startVelocity) < 1) {
+      return handleSnapping(state.index, easeOutQuartic, 500);
+    }
+
+    // Swipe to prev/next (consider a velocity between -20 and 20 to be a swipe)
+    if (Math.abs(startVelocity) < 20) {
+      return handleSnapping(state.index + (startVelocity > 0 ? -1 : 1), easeOutQuartic, SLIDE_SNAPPING_DAMPING);
+    }
+
     // Animation duration based on the speed
     const extraDuration = Math.pow(Math.abs(startVelocity), 2) / 5;
     const totalDuration = DRAG_SNAPPING_DAMPING + extraDuration;
     const blendDuration = Math.round(totalDuration / 2);
-
-    // Return the slider to the current position
-    if (startVelocity > -1 && startVelocity < 1) {
-      return handleSnapping(state.index, easeOutQuartic, 500);
-    }
-
-    // Consider a velocity between -20 and 20 to be a swipe (snap to prev/next index)
-    if (startVelocity > -20 && startVelocity < 20) {
-      return handleSnapping(state.index + (startVelocity > 0 ? -1 : 1), easeOutQuartic, SLIDE_SNAPPING_DAMPING);
-    }
+    const swipeDirection = startVelocity < 0 ? 'left' : 'right';
+    const roundingFn = swipeDirection === 'left' ? Math.ceil : Math.floor;
+    const boundingFn = swipeDirection === 'left' ? Math.max : Math.min;
+    const boundingFnAlt = swipeDirection === 'left' ? Math.min : Math.max;
 
     cancelAnimationFrame(sliderDataRef.current.animationId);
 
-    // @todo set `toIndex` based on the velocity?
     setState((state) => ({ ...state, fromIndex: state.index, sliding: true }));
 
     const velocityDampening = () => {
       const currentTime = Date.now() - startTime;
-      const position = easeOutQuartic(currentTime, startVelocity, -startVelocity, totalDuration);
-      const currentIndex = calculateIndex();
+      const phase: 1 | 2 | 3 = currentTime >= totalDuration ? 3 : currentTime >= totalDuration - blendDuration ? 2 : 1;
+      const currentIndex = calculateIndex(roundingFn);
       const page = Math.floor(getCircularIndex(currentIndex, items.length) / tilesToShow);
+      const blendVelocity = 3;
+      const finalPosition = -(currentIndex * tileWidth);
 
-      sliderDataRef.current.position += position;
+      let nextPosition = 0;
 
-      if (currentTime >= totalDuration - blendDuration) {
-        const targetPosition = -(currentIndex * tileWidth);
-        const change = targetPosition - sliderDataRef.current.position;
-        const currentBlendTime = Date.now() - (startTime + totalDuration - blendDuration);
+      if (phase === 1) {
+        const movement = boundingFnAlt(blendVelocity, easeOutQuartic(currentTime, startVelocity, -startVelocity, totalDuration));
+        nextPosition = sliderDataRef.current.position + movement;
+      } else {
+        // Slowly snap to the target position
+        const blendStartTime = startTime + totalDuration - blendDuration;
+        const blendMs = Date.now() - blendStartTime;
+        const steps = Math.round(blendMs / 250);
+        const blendStep = blendVelocity / 12;
+        const blendMinimum = 0.8;
+        const currentBlendVelocity = Math.max(blendMinimum, blendVelocity - steps * blendStep);
 
-        sliderDataRef.current.position = easeInOutCubic(currentBlendTime, sliderDataRef.current.position, change, blendDuration);
+        if (swipeDirection === 'left') {
+          nextPosition = boundingFn(finalPosition, sliderDataRef.current.position - currentBlendVelocity);
+        } else {
+          nextPosition = boundingFn(finalPosition, sliderDataRef.current.position + currentBlendVelocity);
+        }
       }
+
+      sliderDataRef.current.position = nextPosition;
 
       // interrupt
       if (sliderDataRef.current.scrolling) return;
 
       frameRef.current.style.transform = `translateX(${sliderDataRef.current.position}px)`;
 
-      if (currentTime <= totalDuration) {
+      if (sliderDataRef.current.position !== finalPosition) {
         sliderDataRef.current.animationId = requestAnimationFrame(velocityDampening);
       } else {
         frameRef.current.style.transform = `translateX(${-responsiveTileWidth * currentIndex}%)`;
@@ -354,13 +375,17 @@ const TileSliderComponent = <T,>(
     [slideToIndex, state.index, stepCount],
   );
 
-  useImperativeHandle(ref, () => {
-    return {
-      slide,
-      slideToPage,
-      slideToIndex,
-    };
-  }, [slide, slideToIndex, slideToPage]);
+  useImperativeHandle(
+    ref,
+    () => {
+      return {
+        slide,
+        slideToPage,
+        slideToIndex,
+      };
+    },
+    [slide, slideToIndex, slideToPage],
+  );
 
   const handleTouchStart = useCallback(
     (event: TouchEvent): void => {
@@ -377,7 +402,13 @@ const TileSliderComponent = <T,>(
       sliderDataRef.current.cancelled = false;
 
       onSwipeStart?.();
-      onSlideStart?.({ index: state.index, itemIndex: getCircularIndex(state.index, items.length), page: state.page, pages, total: items.length });
+      onSlideStart?.({
+        index: state.index,
+        itemIndex: getCircularIndex(state.index, items.length),
+        page: state.page,
+        pages,
+        total: items.length,
+      });
     },
     [getSliderPosition, items.length, onSlideStart, onSwipeStart, pages, state.index, state.page],
   );

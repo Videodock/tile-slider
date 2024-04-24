@@ -9,7 +9,7 @@ Performant and accessible React slider with virtualization.
 `@videodock/tile-slider` is a React component of a performant and accessible slider written in React.
 It only renders the visible tiles, meaning that you can have thousands of items and still get a good performance.
 
-TileSlider is fully written using React and doesn't have dependencies. 
+TileSlider is fully written using React and doesn't have dependencies.
 
 ## Documentation
 
@@ -25,7 +25,7 @@ Using v1, see the [v1 branch](https://github.com/Videodock/tile-slider/tree/v1).
 - Custom slide transition
 - Fully responsive using CSS
 - Accessible
-- First-class TypeScript support 
+- First-class TypeScript support
 
 ## Requirements
 
@@ -34,7 +34,7 @@ Using v1, see the [v1 branch](https://github.com/Videodock/tile-slider/tree/v1).
 
 ## Installation
 
-Install this package via (P)NPM or Yarn: 
+Install this package via (P)NPM or Yarn:
 
 ```shell
 $ yarn add @videodock/tile-slider
@@ -98,4 +98,10 @@ Run the documentation app, which showcases all features of the TileSlider packag
 cd docs
 yarn
 yarn start
+```
+
+To serve on a local network (replace `0.0.0.0` with your machine's local IP address):
+
+```shell
+yarn start --host 0.0.0.0
 ```
