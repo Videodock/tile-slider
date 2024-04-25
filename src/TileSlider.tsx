@@ -2,7 +2,7 @@ import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef,
 
 import { useEventCallback } from './hooks/useEventCallback';
 import { AnimationFn, easeOut, easeOutQuartic } from './utils/easing';
-import { getCircularIndex, interpolate } from './utils/math';
+import { getCircularIndex } from './utils/math';
 import { clx } from './utils/clx';
 import { getVelocity, Position, registerMove, TouchMoves } from './utils/drag';
 
@@ -241,7 +241,6 @@ const TileSliderComponent = <T,>(
     // Animation duration based on the speed
     const extraDuration = Math.pow(Math.abs(startVelocity), 2) / 5;
     const totalDuration = DRAG_SNAPPING_DAMPING + extraDuration;
-    const blendDuration = Math.round(totalDuration / 2);
 
     // Snap the slider to the current tile when the velocity is near zero
     if (startVelocity > -1 && startVelocity < 1) {
@@ -259,28 +258,61 @@ const TileSliderComponent = <T,>(
     // @todo set `toIndex` based on the velocity?
     setState((state) => ({ ...state, fromIndex: state.index, sliding: true }));
 
+    let finished = false;
+    let snappingStartTime = -1;
+    let snappingDuration = 0;
+    let snappingStartPosition = 0;
+    let snappingTargetPosition = 0;
+
     const velocityDampening = () => {
       const currentTime = Date.now() - startTime;
       const currentIndex = calculateIndex(); //startVelocity > 0 ? 'floor' : 'ceil');
       const page = Math.floor(getCircularIndex(currentIndex, items.length) / tilesToShow);
-      const blending = currentTime >= totalDuration - blendDuration;
 
       const velocity = easeOutQuartic(currentTime, startVelocity, -startVelocity, totalDuration);
-      sliderDataRef.current.position += velocity;
 
-      if (blending) {
-        const targetPosition = -(currentIndex * tileWidth);
-        const blendProgress = (currentTime - (totalDuration - blendDuration)) / blendDuration;
+      // interrupted by a touch gesture
+      if (sliderDataRef.current.scrolling) return;
 
-        sliderDataRef.current.position = interpolate(sliderDataRef.current.position, targetPosition, blendProgress);
+      // calculate the snapping values when the velocity drops below 10
+      // this ensures that we have a consistent speed to blend the snapping animation
+      if (Math.abs(velocity) <= 10 && snappingStartTime === -1) {
+        snappingStartTime = Date.now();
+
+        const targetIndex = -(velocity > 0
+          ? Math.ceil(sliderDataRef.current.position / tileWidth)
+          : Math.floor(sliderDataRef.current.position / tileWidth));
+        snappingTargetPosition = -(targetIndex * tileWidth);
+        snappingStartPosition = sliderDataRef.current.position;
+
+        // this multiplier aligns pretty well maintaining the same velocity
+        snappingDuration = Math.abs(snappingTargetPosition - sliderDataRef.current.position) * 5;
       }
 
-      // interrupt
-      if (sliderDataRef.current.scrolling) return;
+      if (snappingStartTime !== -1) {
+        const snappingProgress = Date.now() - snappingStartTime;
+
+        if (snappingProgress <= snappingDuration) {
+          sliderDataRef.current.position = easeOut(
+            snappingProgress,
+            snappingStartPosition,
+            snappingTargetPosition - snappingStartPosition,
+            snappingDuration,
+          );
+        } else {
+          finished = true;
+        }
+      } else {
+        sliderDataRef.current.position += velocity;
+      }
 
       frameRef.current.style.transform = `translateX(${sliderDataRef.current.position}px)`;
 
-      if (currentTime <= totalDuration) {
+      if (currentTime >= totalDuration) {
+        finished = true;
+      }
+
+      if (!finished) {
         sliderDataRef.current.animationId = requestAnimationFrame(velocityDampening);
       } else {
         frameRef.current.style.transform = `translateX(${-responsiveTileWidth * currentIndex}%)`;
