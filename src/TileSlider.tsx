@@ -266,49 +266,51 @@ const TileSliderComponent = <T,>(
 
     const velocityDampening = () => {
       const currentTime = Date.now() - startTime;
-      const currentIndex = calculateIndex(); //startVelocity > 0 ? 'floor' : 'ceil');
+      const currentIndex = calculateIndex();
       const page = Math.floor(getCircularIndex(currentIndex, items.length) / tilesToShow);
-
       const velocity = easeOutQuartic(currentTime, startVelocity, -startVelocity, totalDuration);
+      // this is the total duration of the snap animation from the startTime
+      const totalDurationSnap = snappingStartTime + snappingDuration - startTime;
 
       // interrupted by a touch gesture
       if (sliderDataRef.current.scrolling) return;
 
-      // calculate the snapping values when the velocity drops below 10
-      // this ensures that we have a consistent speed to blend the snapping animation
-      if (Math.abs(velocity) <= 10 && snappingStartTime === -1) {
-        snappingStartTime = Date.now();
-
-        const targetIndex = -(velocity > 0
-          ? Math.ceil(sliderDataRef.current.position / tileWidth)
-          : Math.floor(sliderDataRef.current.position / tileWidth));
-        snappingTargetPosition = -(targetIndex * tileWidth);
-        snappingStartPosition = sliderDataRef.current.position;
-
-        // this multiplier aligns pretty well maintaining the same velocity
-        snappingDuration = Math.abs(snappingTargetPosition - sliderDataRef.current.position) * 5;
-      }
-
+      // handle snapping to the precalculated tile index
       if (snappingStartTime !== -1) {
         const snappingProgress = Date.now() - snappingStartTime;
 
-        if (snappingProgress <= snappingDuration) {
-          sliderDataRef.current.position = easeOut(
-            snappingProgress,
-            snappingStartPosition,
-            snappingTargetPosition - snappingStartPosition,
-            snappingDuration,
-          );
-        } else {
+        sliderDataRef.current.position = easeOut(
+          snappingProgress,
+          snappingStartPosition,
+          snappingTargetPosition - snappingStartPosition,
+          snappingDuration,
+        );
+
+        if (snappingProgress >= snappingDuration) {
           finished = true;
         }
       } else {
         sliderDataRef.current.position += velocity;
       }
 
+      // calculate the snapping values when the velocity drops below 10
+      // this ensures that we have a consistent speed to blend the snapping animation
+      if (Math.abs(velocity) <= 10 && snappingStartTime === -1) {
+        snappingStartTime = Date.now();
+
+        const targetIndexFloat = -(sliderDataRef.current.position / tileWidth);
+        const targetIndex = velocity > 0 ? Math.floor(targetIndexFloat - 0.15) : Math.ceil(targetIndexFloat + 0.15);
+        snappingTargetPosition = -(targetIndex * tileWidth);
+        snappingStartPosition = sliderDataRef.current.position;
+
+        // this multiplier aligns pretty well maintaining the same velocity
+        snappingDuration = Math.min(2000, Math.abs(snappingTargetPosition - sliderDataRef.current.position) * 5);
+      }
+
+      // apply the position
       frameRef.current.style.transform = `translateX(${sliderDataRef.current.position}px)`;
 
-      if (currentTime >= totalDuration) {
+      if (currentTime >= Math.max(totalDuration, totalDurationSnap)) {
         finished = true;
       }
 
