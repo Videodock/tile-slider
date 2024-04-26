@@ -234,16 +234,10 @@ const TileSliderComponent = <T,>(
   }, [responsiveTileWidth, tilesToShow]);
 
   const handleVelocity = useEventCallback(() => {
-    const startTime = Date.now();
     const startVelocity = sliderDataRef.current.velocity * 16;
-    const tileWidth = getSliderWidth() / tilesToShow;
 
-    // Animation duration based on the speed
-    const extraDuration = Math.pow(Math.abs(startVelocity), 2) / 5;
-    const totalDuration = DRAG_SNAPPING_DAMPING + extraDuration;
-
-    // Snap the slider to the current tile when the velocity is near zero
-    if (startVelocity > -1 && startVelocity < 1) {
+    // snap back to the current tile when the velocity is near zero
+    if (Math.abs(startVelocity) < 1) {
       return handleSnapping(calculateIndex(), easeOutQuartic, 500);
     }
 
@@ -253,10 +247,11 @@ const TileSliderComponent = <T,>(
       return handleSnapping(calculateIndex() + (startVelocity > 0 ? -1 : 1), easeOutQuartic, SLIDE_SNAPPING_DAMPING);
     }
 
-    cancelAnimationFrame(sliderDataRef.current.animationId);
-
-    // @todo set `toIndex` based on the velocity?
-    setState((state) => ({ ...state, fromIndex: state.index, sliding: true }));
+    // animation duration based on the velocity
+    const startTime = Date.now();
+    const tileWidth = getSliderWidth() / tilesToShow;
+    const extraDuration = Math.pow(Math.abs(startVelocity), 2) / 3.5;
+    const totalDuration = DRAG_SNAPPING_DAMPING + extraDuration;
 
     let finished = false;
     let snappingStartTime = -1;
@@ -264,16 +259,20 @@ const TileSliderComponent = <T,>(
     let snappingStartPosition = 0;
     let snappingTargetPosition = 0;
 
+    cancelAnimationFrame(sliderDataRef.current.animationId);
+    setState((state) => ({ ...state, fromIndex: state.index, sliding: true }));
+
     const velocityDampening = () => {
+      // interrupted by a touch gesture
+      if (sliderDataRef.current.scrolling) return;
+
       const currentTime = Date.now() - startTime;
       const currentIndex = calculateIndex();
       const page = Math.floor(getCircularIndex(currentIndex, items.length) / tilesToShow);
       const velocity = easeOutQuartic(currentTime, startVelocity, -startVelocity, totalDuration);
-      // this is the total duration of the snap animation from the startTime
-      const totalDurationSnap = snappingStartTime + snappingDuration - startTime;
 
-      // interrupted by a touch gesture
-      if (sliderDataRef.current.scrolling) return;
+      // total duration of the snap animation from the startTime
+      const totalDurationSnap = snappingStartTime + snappingDuration - startTime;
 
       // handle snapping to the precalculated tile index
       if (snappingStartTime !== -1) {
@@ -299,12 +298,13 @@ const TileSliderComponent = <T,>(
         snappingStartTime = Date.now();
 
         const targetIndexFloat = -(sliderDataRef.current.position / tileWidth);
-        const targetIndex = velocity > 0 ? Math.floor(targetIndexFloat - 0.15) : Math.ceil(targetIndexFloat + 0.15);
+        const targetBuffer = 0.5;
+        const targetIndex = velocity > 0 ? Math.floor(targetIndexFloat - targetBuffer) : Math.ceil(targetIndexFloat + targetBuffer);
         snappingTargetPosition = -(targetIndex * tileWidth);
         snappingStartPosition = sliderDataRef.current.position;
 
         // this multiplier aligns pretty well maintaining the same velocity
-        snappingDuration = Math.min(2000, Math.abs(snappingTargetPosition - sliderDataRef.current.position) * 5);
+        snappingDuration = Math.min(2500, Math.abs(snappingTargetPosition - sliderDataRef.current.position) * 5);
       }
 
       // apply the position
@@ -549,7 +549,7 @@ const TileSliderComponent = <T,>(
           })}
         </div>
       )}
-      <div className="TileSlider-gestures" style={{ marginLeft: -(spacing / 2), marginRight: -(spacing / 2) }} ref={gesturesRef}>
+      <div className="TileSlider-gestures" style={{ marginLeft: -(spacing / 2), marginRight: 150 }} ref={gesturesRef}>
         <ul className="TileSlider-list" ref={frameRef} style={{ left: `calc(${listOffset}%)` }}>
           {renderTiles()}
         </ul>
