@@ -1,0 +1,40 @@
+---
+sidebar_position: 7
+---
+
+# Dynamic Props
+
+## Example
+
+import { WithDynamicPropsExample } from '../helpers';
+import '../../../src/style.css';
+
+<WithDynamicPropsExample />
+
+## Code
+
+```tsx
+import { TileSlider } from '@videodock/tile-slider';
+
+export const WithDynamicPropsExample = () => {
+  const tileSliderRef = useRef<TileSliderRef>();
+  const [state, setState] = useState({ tilesToShow: 3 });
+
+  return (
+    <>
+      <TileSlider
+        sliderRef={tileSliderRef}
+        tilesToShow={state.tilesToShow}
+        renderTile={renderTile}
+        items={items}
+        renderRightControl={renderRightControl}
+        renderLeftControl={renderLeftControl}
+      />
+      <label>Tiles to show: </label>
+      <button onClick={() => setState({ tilesToShow: state.tilesToShow - 1})}>-</button>
+      <input value={state.tilesToShow} style={{ width: 40, textAlign: 'center' }} />
+      <button onClick={() => setState({ tilesToShow: state.tilesToShow + 1})}>+</button>
+    </>
+  );
+};
+```
