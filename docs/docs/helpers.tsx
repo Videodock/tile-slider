@@ -122,7 +122,7 @@ export const WithRefExample = () => {
   return (
     <>
       <TileSlider
-        ref={tileSliderRef}
+        sliderRef={tileSliderRef}
         tilesToShow={3}
         renderTile={renderTile}
         items={items}

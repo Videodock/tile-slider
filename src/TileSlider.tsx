@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 import { useEventCallback } from './hooks/useEventCallback';
 import { AnimationFn, easeOut, easeOutQuartic } from './utils/easing';
@@ -47,6 +47,7 @@ export type RenderPagination = (props: PaginationProps) => React.ReactElement;
 
 export type TileSliderProps<T> = {
   items: T[];
+  sliderRef?: React.ForwardedRef<TileSliderRef>;
   cycleMode?: CycleMode;
   tilesToShow?: number;
   spacing?: number;
@@ -72,29 +73,27 @@ export type TileSliderRef = {
   slideToPage: (page: number) => void;
 };
 
-const TileSliderComponent = <T,>(
-  {
-    items,
-    tilesToShow = 6,
-    cycleMode = 'endless',
-    spacing = 12,
-    showControls = true,
-    animated = PREFERS_REDUCED_MOTION,
-    animationFn = easeOut,
-    pageStep = 'page',
-    renderTile,
-    renderLeftControl,
-    renderRightControl,
-    renderPagination,
-    className,
-    onSwipeStart,
-    onSwipeEnd,
-    onSlideStart,
-    onSlideEnd,
-    overscan = tilesToShow,
-  }: TileSliderProps<T>,
-  ref: React.ForwardedRef<TileSliderRef>,
-) => {
+export const TileSlider = <T,>({
+  items,
+  sliderRef,
+  tilesToShow = 6,
+  cycleMode = 'endless',
+  spacing = 12,
+  showControls = true,
+  animated = PREFERS_REDUCED_MOTION,
+  animationFn = easeOut,
+  pageStep = 'page',
+  renderTile,
+  renderLeftControl,
+  renderRightControl,
+  renderPagination,
+  className,
+  onSwipeStart,
+  onSwipeEnd,
+  onSlideStart,
+  onSlideEnd,
+  overscan = tilesToShow,
+}: TileSliderProps<T>) => {
   const frameRef = useRef<HTMLUListElement>() as React.MutableRefObject<HTMLUListElement>;
   const gesturesRef = useRef<HTMLDivElement>() as React.MutableRefObject<HTMLDivElement>;
   const responsiveTileWidth = 100 / tilesToShow;
@@ -390,7 +389,7 @@ const TileSliderComponent = <T,>(
   );
 
   useImperativeHandle(
-    ref,
+    sliderRef,
     () => {
       return {
         slide,
@@ -575,5 +574,3 @@ const TileSliderComponent = <T,>(
     </div>
   );
 };
-
-export const TileSlider = forwardRef(TileSliderComponent);
