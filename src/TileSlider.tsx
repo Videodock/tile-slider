@@ -247,9 +247,9 @@ const TileSliderComponent = <T,>(
       return handleSnapping(calculateIndex(), easeOutQuartic, 500);
     }
 
-    // Consider a velocity between -8 and 8 to be a swipe (snap to prev/next index)
+    // Swipe to prev/next (consider a velocity between -8 and 8 to be a swipe)
     // A velocity of 8 is little more than a gentle swipe
-    if (startVelocity > -8 && startVelocity < 8) {
+    if (Math.abs(startVelocity) < 8) {
       return handleSnapping(calculateIndex() + (startVelocity > 0 ? -1 : 1), easeOutQuartic, SLIDE_SNAPPING_DAMPING);
     }
 
