@@ -162,8 +162,10 @@ export const TileSlider = <T,>({
 
   const handleResize = useEventCallback(() => {
     cancelAnimationFrame(sliderDataRef.current.animationId);
-    sliderDataRef.current.frameWidth = frameRef.current ? parseFloat(getComputedStyle(frameRef.current).width) : 0;
-    frameRef.current.style.transform = `translateX(${-responsiveTileWidth * state.index}%)`;
+    if (frameRef.current) {
+      sliderDataRef.current.frameWidth = parseFloat(getComputedStyle(frameRef.current).width);
+      frameRef.current.style.transform = `translateX(${-responsiveTileWidth * state.index}%)`;
+    }
   });
 
   const handleSnapping = useEventCallback((index: number, animationFn: AnimationFn, duration = SLIDE_SNAPPING_DAMPING) => {
@@ -507,7 +509,7 @@ export const TileSlider = <T,>({
     handleResize();
 
     return () => {
-      window.addEventListener('resize', handleResize);
+      window.removeEventListener('resize', handleResize);
       gesturesElement.removeEventListener('touchstart', handleTouchStart);
       gesturesElement.removeEventListener('touchstart', handleTouchStart);
       gesturesElement.removeEventListener('touchmove', handleTouchMove);
