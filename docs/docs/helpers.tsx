@@ -115,6 +115,28 @@ export function easeOutElastic(currentTime: number, startValue: number, changeIn
   );
 }
 
+export const WithDynamicPropsExample = () => {
+  const tileSliderRef = useRef<TileSliderRef>();
+  const [state, setState] = useState({ tilesToShow: 3 });
+
+  return (
+    <>
+      <TileSlider
+        sliderRef={tileSliderRef}
+        tilesToShow={state.tilesToShow}
+        renderTile={renderTile}
+        items={items}
+        renderRightControl={renderRightControl}
+        renderLeftControl={renderLeftControl}
+      />
+      <label>Tiles to show: </label>
+      <button onClick={() => setState({ tilesToShow: state.tilesToShow - 1})}>-</button>
+      <input value={state.tilesToShow} style={{ width: 40, textAlign: 'center' }} />
+      <button onClick={() => setState({ tilesToShow: state.tilesToShow + 1})}>+</button>
+    </>
+  );
+};
+
 export const WithRefExample = () => {
   const tileSliderRef = useRef<TileSliderRef>();
   const [state, setState] = useState({ index: 0, itemIndex: 0, page: 0 });
@@ -132,9 +154,15 @@ export const WithRefExample = () => {
       />
       <hr />
       <h3>State</h3>
-      <div><label>Current index:</label> {state.index} </div>
-      <div><label>Current item index:</label> {state.itemIndex} </div>
-      <div><label>Current page:</label> {state.page}</div>
+      <div>
+        <label>Current index:</label> {state.index}{' '}
+      </div>
+      <div>
+        <label>Current item index:</label> {state.itemIndex}{' '}
+      </div>
+      <div>
+        <label>Current page:</label> {state.page}
+      </div>
       <h3>Controls</h3>
       <div>
         <strong>slide(direction: &apos;left&apos; | &apos;right&apos;)</strong>

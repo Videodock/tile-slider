@@ -136,14 +136,11 @@ export const TileSlider = <T,>({
     velocity: 0,
     lastRenderedIndex: 0,
     animationId: 0,
-  });
-
-  const getSliderWidth = useEventCallback(() => {
-    return parseFloat(getComputedStyle(frameRef.current).width);
+    frameWidth: 0,
   });
 
   const calculateIndex = useCallback(() => {
-    const tileWidth = getSliderWidth() / tilesToShow;
+    const tileWidth = sliderDataRef.current.frameWidth / tilesToShow;
     let index = Math.round((sliderDataRef.current.position / tileWidth) * -1);
 
     if (!isMultiPage) {
@@ -155,16 +152,24 @@ export const TileSlider = <T,>({
     }
 
     return index;
-  }, [cycleMode, getSliderWidth, isMultiPage, items.length, tilesToShow]);
+  }, [cycleMode, isMultiPage, items.length, tilesToShow]);
 
   const getSliderPosition = useEventCallback(() => {
-    const transform = getComputedStyle(frameRef.current).transform?.split(', ')[4];
+    const transform = frameRef.current ? getComputedStyle(frameRef.current).transform?.split(', ')[4] : '0';
 
     return transform ? parseInt(transform) : 0;
   });
 
+  const handleResize = useEventCallback(() => {
+    cancelAnimationFrame(sliderDataRef.current.animationId);
+    if (frameRef.current) {
+      sliderDataRef.current.frameWidth = parseFloat(getComputedStyle(frameRef.current).width);
+      frameRef.current.style.transform = `translateX(${-responsiveTileWidth * state.index}%)`;
+    }
+  });
+
   const handleSnapping = useEventCallback((index: number, animationFn: AnimationFn, duration = SLIDE_SNAPPING_DAMPING) => {
-    const tileWidth = getSliderWidth() / tilesToShow;
+    const tileWidth = sliderDataRef.current.frameWidth / tilesToShow;
     const from = getSliderPosition();
     const relativeToPosition = -responsiveTileWidth * index;
     const to = -(index * tileWidth);
@@ -189,15 +194,15 @@ export const TileSlider = <T,>({
     setState((state) => ({ ...state, toIndex: index, fromIndex: state.index, sliding: true }));
 
     const snappingDampening = () => {
+      // interrupt
+      if (!frameRef.current || sliderDataRef.current.scrolling) return;
+
       const currentTime = Date.now() - startTime;
       const position = animationFn(currentTime, from, change, duration);
       const currentIndex = calculateIndex();
 
       sliderDataRef.current.position = position;
       frameRef.current.style.transform = `translateX(${position}px)`;
-
-      // interrupt
-      if (sliderDataRef.current.scrolling) return;
 
       if (currentTime <= duration) {
         sliderDataRef.current.animationId = requestAnimationFrame(snappingDampening);
@@ -227,10 +232,10 @@ export const TileSlider = <T,>({
     requestAnimationFrame(snappingDampening);
   });
 
+  // this effect resets the position when the tilesToShow changes
   useEffect(() => {
-    frameRef.current.style.transform = `translateX(${-responsiveTileWidth * state.index}%)`;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [responsiveTileWidth, tilesToShow]);
+    handleResize();
+  }, [handleResize, responsiveTileWidth, tilesToShow]);
 
   const handleVelocity = useEventCallback(() => {
     const startVelocity = sliderDataRef.current.velocity * 16;
@@ -248,7 +253,7 @@ export const TileSlider = <T,>({
 
     // animation duration based on the velocity
     const startTime = Date.now();
-    const tileWidth = getSliderWidth() / tilesToShow;
+    const tileWidth = sliderDataRef.current.frameWidth / tilesToShow;
     const extraDuration = Math.pow(Math.abs(startVelocity), 2) / 3.5;
     const totalDuration = DRAG_SNAPPING_DAMPING + extraDuration;
 
@@ -262,8 +267,8 @@ export const TileSlider = <T,>({
     setState((state) => ({ ...state, fromIndex: state.index, sliding: true }));
 
     const velocityDampening = () => {
-      // interrupted by a touch gesture
-      if (sliderDataRef.current.scrolling) return;
+      // interrupted by a touch gesture or the slider was unmounted
+      if (!frameRef.current || sliderDataRef.current.scrolling) return;
 
       const currentTime = Date.now() - startTime;
       const currentIndex = calculateIndex();
@@ -400,121 +405,118 @@ export const TileSlider = <T,>({
     [slide, slideToIndex, slideToPage],
   );
 
-  const handleTouchStart = useCallback(
-    (event: TouchEvent): void => {
-      sliderDataRef.current.origin = {
-        x: event.touches[0].clientX,
-        y: event.touches[0].clientY,
-      };
-      // reset data
-      sliderDataRef.current.velocity = 0;
-      sliderDataRef.current.moves = registerMove([], sliderDataRef.current.origin);
-      sliderDataRef.current.position = getSliderPosition();
+  const handleTouchStart = useEventCallback((event: TouchEvent): void => {
+    sliderDataRef.current.origin = {
+      x: event.touches[0].clientX,
+      y: event.touches[0].clientY,
+    };
+    // reset data
+    sliderDataRef.current.velocity = 0;
+    sliderDataRef.current.moves = registerMove([], sliderDataRef.current.origin);
+    sliderDataRef.current.position = getSliderPosition();
+
+    sliderDataRef.current.scrolling = true;
+    sliderDataRef.current.cancelled = false;
+
+    onSwipeStart?.();
+    onSlideStart?.({
+      index: state.index,
+      itemIndex: getCircularIndex(state.index, items.length),
+      page: state.page,
+      pages,
+      total: items.length,
+    });
+  });
+
+  const handleTouchMove = useEventCallback((event: TouchEvent) => {
+    const newPosition = {
+      x: event.changedTouches[0].clientX,
+      y: event.changedTouches[0].clientY,
+    };
+
+    const { origin, scrolling } = sliderDataRef.current;
+    sliderDataRef.current.moves = registerMove(sliderDataRef.current.moves, newPosition);
+
+    // total movement
+    let delta: number = newPosition.x - origin.x;
+    const movementX: number = Math.abs(newPosition.x - origin.x);
+    const movementY: number = Math.abs(newPosition.y - origin.y);
+
+    if (movementX < movementY || sliderDataRef.current.cancelled) {
+      sliderDataRef.current.cancelled = true;
+      return;
+    }
+
+    if (movementX > movementY || scrolling) {
+      event.preventDefault();
+      event.stopPropagation();
 
       sliderDataRef.current.scrolling = true;
-      sliderDataRef.current.cancelled = false;
-
-      onSwipeStart?.();
-      onSlideStart?.({
-        index: state.index,
-        itemIndex: getCircularIndex(state.index, items.length),
-        page: state.page,
-        pages,
-        total: items.length,
-      });
-    },
-    [getSliderPosition, items.length, onSlideStart, onSwipeStart, pages, state.index, state.page],
-  );
-
-  const handleTouchMove = useCallback(
-    (event: TouchEvent) => {
-      const newPosition = {
-        x: event.changedTouches[0].clientX,
-        y: event.changedTouches[0].clientY,
-      };
-      const { origin, scrolling } = sliderDataRef.current;
-      sliderDataRef.current.moves = registerMove(sliderDataRef.current.moves, newPosition);
-
-      // total movement
-      let delta: number = newPosition.x - origin.x;
-      const movementX: number = Math.abs(newPosition.x - origin.x);
-      const movementY: number = Math.abs(newPosition.y - origin.y);
-
-      if (movementX < movementY || sliderDataRef.current.cancelled) {
-        sliderDataRef.current.cancelled = true;
-        return;
-      }
-
-      if (movementX > movementY || scrolling) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        sliderDataRef.current.scrolling = true;
-
-        // snap to edges when there is nothing to scroll
-        if (!isMultiPage) delta = Math.max(-DRAG_EDGE_SNAP, Math.min(DRAG_EDGE_SNAP, delta));
-
-        // instead of absolute positioning, we could do `calc(${relativePosition}% + ${delta}px)`
-        frameRef.current.style.transform = `translateX(${sliderDataRef.current.position + delta}px)`;
-      }
-    },
-    [isMultiPage],
-  );
-
-  const handleTouchEnd = useCallback(
-    (event: TouchEvent) => {
-      const { origin, moves } = sliderDataRef.current;
-      const newPosition = {
-        x: event.changedTouches[0].clientX,
-        y: event.changedTouches[0].clientY,
-      };
-
-      // relative movement (velocity)
-      const velocity = getVelocity(moves);
-
-      let delta: number = newPosition.x - origin.x;
-      const movementX: number = Math.abs(newPosition.x - origin.x);
-      const movementY: number = Math.abs(newPosition.y - origin.y);
 
       // snap to edges when there is nothing to scroll
       if (!isMultiPage) delta = Math.max(-DRAG_EDGE_SNAP, Math.min(DRAG_EDGE_SNAP, delta));
 
-      sliderDataRef.current.scrolling = false;
-      sliderDataRef.current.velocity = 0;
+      // instead of absolute positioning, we could do `calc(${relativePosition}% + ${delta}px)`
+      frameRef.current.style.transform = `translateX(${sliderDataRef.current.position + delta}px)`;
+    }
+  });
 
-      if (sliderDataRef.current.cancelled || !isMultiPage) {
-        return handleVelocity();
-      }
+  const handleTouchEnd = useEventCallback((event: TouchEvent) => {
+    const { origin, moves } = sliderDataRef.current;
+    const newPosition = {
+      x: event.changedTouches[0].clientX,
+      y: event.changedTouches[0].clientY,
+    };
 
-      sliderDataRef.current.position += delta;
+    // relative movement (velocity)
+    const velocity = getVelocity(moves);
 
-      // we slide when the movement was mostly horizontal
-      if (movementX > movementY) {
-        sliderDataRef.current.velocity = velocity;
-      }
+    let delta: number = newPosition.x - origin.x;
+    const movementX: number = Math.abs(newPosition.x - origin.x);
+    const movementY: number = Math.abs(newPosition.y - origin.y);
 
-      onSwipeEnd?.();
+    // snap to edges when there is nothing to scroll
+    if (!isMultiPage) delta = Math.max(-DRAG_EDGE_SNAP, Math.min(DRAG_EDGE_SNAP, delta));
 
-      handleVelocity();
-    },
-    [handleVelocity, isMultiPage, onSwipeEnd],
-  );
+    sliderDataRef.current.scrolling = false;
+    sliderDataRef.current.velocity = 0;
+
+    if (sliderDataRef.current.cancelled || !isMultiPage) {
+      return handleVelocity();
+    }
+
+    sliderDataRef.current.position += delta;
+
+    // we slide when the movement was mostly horizontal
+    if (movementX > movementY) {
+      sliderDataRef.current.velocity = velocity;
+    }
+
+    onSwipeEnd?.();
+
+    handleVelocity();
+  });
 
   useEffect(() => {
     const gesturesElement = gesturesRef.current;
 
+    window.addEventListener('resize', handleResize);
     gesturesElement.addEventListener('touchstart', handleTouchStart);
     gesturesElement.addEventListener('touchmove', handleTouchMove, { passive: false });
     gesturesElement.addEventListener('touchend', handleTouchEnd);
     gesturesElement.addEventListener('touchcancel', handleTouchEnd);
 
+    handleResize();
+
     return () => {
+      window.removeEventListener('resize', handleResize);
+      gesturesElement.removeEventListener('touchstart', handleTouchStart);
       gesturesElement.removeEventListener('touchstart', handleTouchStart);
       gesturesElement.removeEventListener('touchmove', handleTouchMove);
       gesturesElement.removeEventListener('touchend', handleTouchEnd);
       gesturesElement.removeEventListener('touchcancel', handleTouchEnd);
     };
-  }, [handleTouchEnd, handleTouchMove, handleTouchStart]);
+  }, [handleResize, handleTouchEnd, handleTouchMove, handleTouchStart]);
 
   const renderTileContainer = (index: number) => {
     const itemIndex = getCircularIndex(index, items.length);
