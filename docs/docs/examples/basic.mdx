@@ -4,14 +4,19 @@ sidebar_position: 1
 
 # Basic example
 
-
 ## Example
 
 import { TileSlider } from '../../../src';
 import { items, renderLeftControl, renderRightControl, renderTile } from '../helpers';
 import '../../../src/style.css';
 
-<TileSlider tilesToShow={3} renderTile={renderTile} items={items} renderRightControl={renderRightControl} renderLeftControl={renderLeftControl} />
+<TileSlider
+  tilesToShow={3}
+  renderTile={renderTile}
+  items={items}
+  renderRightControl={renderRightControl}
+  renderLeftControl={renderLeftControl}
+/>
 
 ## Code
 
@@ -30,7 +35,7 @@ const items: Tile[] = Array.from({ length: 10 }, (_, index) => ({
 }));
 
 const renderTile: RenderTile<Tile> = ({ item, isVisible }) => (
-  <div className={`exampleTile ${!isVisible ? 'outOfView' : ''}`}>
+  <div className={'exampleTile'}>
     <img src={item.image} alt={item.title} />
   </div>
 );
