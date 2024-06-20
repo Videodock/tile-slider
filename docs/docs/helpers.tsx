@@ -34,13 +34,13 @@ export const IconRight = () => (
 );
 
 export const renderTile: RenderTile<Tile> = ({ item, isVisible }) => (
-  <div className={`exampleTile ${!isVisible ? 'outOfView' : ''}`}>
+  <div className={'exampleTile'}>
     <img src={item.image} alt={item.title} />
   </div>
 );
 
 export const renderTileWithTitle: RenderTile<Tile> = ({ item, isVisible }) => (
-  <div className={`exampleTile ${!isVisible ? 'outOfView' : ''}`}>
+  <div className={'exampleTile'}>
     <img src={item.image} alt={item.title} />
     <div>{item.title}</div>
   </div>
@@ -130,9 +130,9 @@ export const WithDynamicPropsExample = () => {
         renderLeftControl={renderLeftControl}
       />
       <label>Tiles to show: </label>
-      <button onClick={() => setState({ tilesToShow: state.tilesToShow - 1})}>-</button>
+      <button onClick={() => setState({ tilesToShow: state.tilesToShow - 1 })}>-</button>
       <input value={state.tilesToShow} style={{ width: 40, textAlign: 'center' }} />
-      <button onClick={() => setState({ tilesToShow: state.tilesToShow + 1})}>+</button>
+      <button onClick={() => setState({ tilesToShow: state.tilesToShow + 1 })}>+</button>
     </>
   );
 };
