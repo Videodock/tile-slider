@@ -5,7 +5,7 @@ export const useEventCallback = <T extends (...args: any[]) => unknown>(fn: T) =
 
   useInsertionEffect(() => {
     handler.current = fn;
-  }, [fn])
+  }, [fn]);
 
   return useCallback((...args: any[]) => {
     return handler.current(...args);
