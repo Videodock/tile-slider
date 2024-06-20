@@ -9,7 +9,7 @@ const getMediaQueries = () => {
     const md: MediaQueryList = matchMedia('screen and (min-width: 768px) and (max-width: 1023px)'); // tablet large
     const lg: MediaQueryList = matchMedia('screen and (min-width: 1024px) and (max-width: 1199px)'); // desktop
 
-    memoizedMediaQueries = [xs, sm, md, lg]
+    memoizedMediaQueries = [xs, sm, md, lg];
   }
 
   return memoizedMediaQueries;

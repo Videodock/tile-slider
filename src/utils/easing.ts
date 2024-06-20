@@ -14,8 +14,11 @@ export const easeOutQuartic: AnimationFn = (currentTime, startValue, changeInVal
 
 export const easeInOutCubic: AnimationFn = (currentTime, startValue, changeInValue, duration) => {
   currentTime /= duration;
-  return changeInValue * (currentTime < 0.5 ? 4 * currentTime * currentTime * currentTime : 1 - Math.pow(-2 * currentTime + 2, 3) / 2) + startValue;
-}
+  return (
+    changeInValue * (currentTime < 0.5 ? 4 * currentTime * currentTime * currentTime : 1 - Math.pow(-2 * currentTime + 2, 3) / 2) +
+    startValue
+  );
+};
 
 export const easeInOut: AnimationFn = (currentTime, startValue, changeInValue, duration) => {
   currentTime /= duration / 2;
