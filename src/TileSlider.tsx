@@ -248,7 +248,7 @@ export const TileSlider = <T,>({
     // Swipe to prev/next (consider a velocity between -8 and 8 to be a swipe)
     // A velocity of 8 is little more than a gentle swipe
     if (Math.abs(startVelocity) < 8) {
-      return handleSnapping(calculateIndex() + (startVelocity > 0 ? -1 : 1), easeOutQuartic, SLIDE_SNAPPING_DAMPING);
+      return handleSnapping(calculateIndex(), easeOutQuartic, SLIDE_SNAPPING_DAMPING);
     }
 
     // animation duration based on the velocity
