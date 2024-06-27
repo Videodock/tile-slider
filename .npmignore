@@ -1,6 +1,7 @@
 /.idea
 /src
 /example
+/docs
 
 rollup.config.js
 tsconfig.json
