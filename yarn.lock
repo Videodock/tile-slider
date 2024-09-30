@@ -2008,10 +2008,10 @@ rollup-plugin-copy@^3.5.0:
     globby "10.0.1"
     is-plain-object "^3.0.0"
 
-rollup-plugin-import-css@^3.5.1:
-  version "3.5.1"
-  resolved "https://registry.yarnpkg.com/rollup-plugin-import-css/-/rollup-plugin-import-css-3.5.1.tgz#1b920ab36bef0bc6b5ef88293a49dceebc37d61d"
-  integrity sha512-cXgMPCUoDu64A2OFme4Is3eHmLiA54qTzxfvCbsORzro3C1adSe1fMMKUqfOUKTXROAPpW9PNDjpaGgPloGJOQ==
+rollup-plugin-import-css@^3.5.4:
+  version "3.5.4"
+  resolved "https://registry.yarnpkg.com/rollup-plugin-import-css/-/rollup-plugin-import-css-3.5.4.tgz#4d088ff9f9ecb13a0593c6b97a9694a6d04b9167"
+  integrity sha512-iEUQhqJg6QK2nvy4RngCVrnNrxUUhc3viJIlgrtntDwrMbLhhpTsRrVWzQ5Kq0oYloNmVV6bOL/USmhQECqaIg==
   dependencies:
     "@rollup/pluginutils" "^5.0.4"
 
