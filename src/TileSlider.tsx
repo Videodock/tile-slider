@@ -110,8 +110,6 @@ export const TileSlider = <T,>({
     hasSlideBefore: false,
   });
 
-  const showLeftControl: boolean = needControls && !(cycleMode === 'stop' && state.index === 0);
-  const showRightControl: boolean = needControls && !(cycleMode === 'stop' && state.index === items.length - tilesToShow);
   const leftControlDisabled = (cycleMode === 'stop' && state.index === 0) || !state.hasSlideBefore;
   const rightControlDisabled = cycleMode === 'stop' && state.index === items.length - tilesToShow;
 
@@ -540,29 +538,31 @@ export const TileSlider = <T,>({
     return Array.from({ length: totalTiles }, (_, index) => renderTileContainer(startIndex + index));
   };
 
+  const renderLeftControlWrapper = () => {
+    const content = renderLeftControl?.({
+      onClick: () => slide('left'),
+      disabled: leftControlDisabled,
+    });
+    return content && <div className="TileSlider-leftControl">{content}</div>;
+  };
+
+  const renderRightControlWrapper = () => {
+    const content = renderRightControl?.({
+      onClick: () => slide('right'),
+      disabled: rightControlDisabled,
+    });
+    return content && <div className="TileSlider-rightControl">{content}</div>;
+  };
+
   return (
     <div className={clx('TileSlider', className)}>
-      {showLeftControl && !!renderLeftControl && (
-        <div className="TileSlider-leftControl">
-          {renderLeftControl({
-            onClick: () => slide('left'),
-            disabled: leftControlDisabled,
-          })}
-        </div>
-      )}
+      {renderLeftControlWrapper()}
       <div className="TileSlider-gestures" style={{ marginLeft: -(spacing / 2), marginRight: -(spacing / 2) }} ref={gesturesRef}>
         <ul className="TileSlider-list" ref={frameRef} style={{ left: `calc(${listOffset}%)` }}>
           {renderTiles()}
         </ul>
       </div>
-      {showRightControl && !!renderRightControl && (
-        <div className="TileSlider-rightControl">
-          {renderRightControl({
-            onClick: () => slide('right'),
-            disabled: rightControlDisabled,
-          })}
-        </div>
-      )}
+      {renderRightControlWrapper()}
       {renderPagination?.({
         index: state.index,
         itemIndex: getCircularIndex(state.index, items.length),
