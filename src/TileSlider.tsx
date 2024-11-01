@@ -99,7 +99,6 @@ export const TileSlider = <T,>({
   const responsiveTileWidth = 100 / tilesToShow;
   const isMultiPage: boolean = items.length > tilesToShow;
   const pages = Math.ceil(items.length / tilesToShow);
-  const needControls: boolean = showControls && isMultiPage;
 
   const [state, setState] = useState({
     index: 0,
