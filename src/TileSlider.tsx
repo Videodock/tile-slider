@@ -107,10 +107,9 @@ export const TileSlider = <T,>({
     toIndex: 0,
     sliding: false,
     page: 0,
-    hasSlideBefore: false,
   });
 
-  const leftControlDisabled = (cycleMode === 'stop' && state.index === 0) || !state.hasSlideBefore;
+  const leftControlDisabled = cycleMode === 'stop' && state.index === 0;
   const rightControlDisabled = cycleMode === 'stop' && state.index === items.length - tilesToShow;
 
   const dynamicStepCount = pageStep === 'page' ? tilesToShow : 1;
@@ -176,7 +175,7 @@ export const TileSlider = <T,>({
     const page = Math.floor(getCircularIndex(index, items.length) / tilesToShow);
 
     if (!animated) {
-      setState((state) => ({ ...state, index, page, hasSlideBefore: true, sliding: false }));
+      setState((state) => ({ ...state, index, page, sliding: false }));
       frameRef.current.style.transform = `translateX(${relativeToPosition}%)`;
       onSlideEnd?.({
         index: index,
