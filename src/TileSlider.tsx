@@ -390,17 +390,13 @@ export const TileSlider = <T,>({
     [slideToIndex, state.index, stepCount],
   );
 
-  useImperativeHandle(
-    sliderRef,
-    () => {
-      return {
-        slide,
-        slideToPage,
-        slideToIndex,
-      };
-    },
-    [slide, slideToIndex, slideToPage],
-  );
+  useImperativeHandle(sliderRef, () => {
+    return {
+      slide,
+      slideToPage,
+      slideToIndex,
+    };
+  }, [slide, slideToIndex, slideToPage]);
 
   const handleTouchStart = useEventCallback((event: TouchEvent): void => {
     sliderDataRef.current.origin = {
