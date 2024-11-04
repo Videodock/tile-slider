@@ -99,6 +99,7 @@ export const TileSlider = <T,>({
   const responsiveTileWidth = 100 / tilesToShow;
   const isMultiPage: boolean = items.length > tilesToShow;
   const pages = Math.ceil(items.length / tilesToShow);
+  const needControls: boolean = showControls && isMultiPage;
 
   const [state, setState] = useState({
     index: 0,
@@ -554,13 +555,13 @@ export const TileSlider = <T,>({
 
   return (
     <div className={clx('TileSlider', className)}>
-      {renderLeftControlWrapper()}
+      {needControls && renderLeftControlWrapper()}
       <div className="TileSlider-gestures" style={{ marginLeft: -(spacing / 2), marginRight: -(spacing / 2) }} ref={gesturesRef}>
         <ul className="TileSlider-list" ref={frameRef} style={{ left: `calc(${listOffset}%)` }}>
           {renderTiles()}
         </ul>
       </div>
-      {renderRightControlWrapper()}
+      {needControls && renderRightControlWrapper()}
       {renderPagination?.({
         index: state.index,
         itemIndex: getCircularIndex(state.index, items.length),
