@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 import { useEventCallback } from './hooks/useEventCallback';
-import { AnimationFn, easeOut, easeOutQuartic } from './utils/easing';
+import { AnimationFn, easeOut, easeOutQuartic, clampWithEasing } from './utils/easing';
 import { getCircularIndex } from './utils/math';
 import { clx } from './utils/clx';
 import { getVelocity, Position, registerMove, TouchMoves } from './utils/drag';
@@ -136,20 +136,26 @@ export const TileSlider = <T,>({
     frameWidth: 0,
   });
 
+  const getIndexWithBoundary = useCallback(
+    (index: number) => {
+      if (!isMultiPage) {
+        index = 0;
+      }
+
+      if (cycleMode === CYCLE_MODE_STOP) {
+        index = Math.max(0, Math.min(items.length - tilesToShow, index));
+      }
+
+      return index;
+    },
+    [cycleMode, isMultiPage, items.length, tilesToShow],
+  );
+
   const calculateIndex = useCallback(() => {
     const tileWidth = sliderDataRef.current.frameWidth / tilesToShow;
-    let index = Math.round((sliderDataRef.current.position / tileWidth) * -1);
 
-    if (!isMultiPage) {
-      index = 0;
-    }
-
-    if (cycleMode === 'stop') {
-      index = Math.max(0, Math.min(items.length - tilesToShow, index));
-    }
-
-    return index;
-  }, [cycleMode, isMultiPage, items.length, tilesToShow]);
+    return getIndexWithBoundary(Math.round((sliderDataRef.current.position / tileWidth) * -1));
+  }, [getIndexWithBoundary, tilesToShow]);
 
   const getSliderPosition = useEventCallback(() => {
     const transform = frameRef.current ? getComputedStyle(frameRef.current).transform?.split(', ')[4] : '0';
@@ -249,16 +255,17 @@ export const TileSlider = <T,>({
     }
 
     // animation duration based on the velocity
-    const startTime = Date.now();
+    let startTime = Date.now();
     const tileWidth = sliderDataRef.current.frameWidth / tilesToShow;
     const extraDuration = Math.pow(Math.abs(startVelocity), 2) / 3.5;
-    const totalDuration = DRAG_SNAPPING_DAMPING + extraDuration;
+    let totalDuration = DRAG_SNAPPING_DAMPING + extraDuration;
 
     let finished = false;
     let snappingStartTime = -1;
     let snappingDuration = 0;
     let snappingStartPosition = 0;
     let snappingTargetPosition = 0;
+    let boundaryReached = false;
 
     cancelAnimationFrame(sliderDataRef.current.animationId);
     setState((state) => ({ ...state, fromIndex: state.index, sliding: true }));
@@ -274,6 +281,13 @@ export const TileSlider = <T,>({
 
       // total duration of the snap animation from the startTime
       const totalDurationSnap = snappingStartTime + snappingDuration - startTime;
+
+      // in cycle mode stop, quickly cancel out the velocity animation when we have reached a boundary
+      if (cycleMode === CYCLE_MODE_STOP && !boundaryReached && (currentIndex <= 0 || currentIndex >= totalTiles - tilesToShow)) {
+        startTime = Date.now();
+        totalDuration = 200;
+        boundaryReached = true;
+      }
 
       // handle snapping to the precalculated tile index
       if (snappingStartTime !== -1) {
@@ -291,6 +305,15 @@ export const TileSlider = <T,>({
         }
       } else {
         sliderDataRef.current.position += velocity;
+
+        if (cycleMode === CYCLE_MODE_STOP) {
+          sliderDataRef.current.position = clampWithEasing(
+            sliderDataRef.current.position,
+            -tileWidth * (totalTiles - tilesToShow),
+            0,
+            DRAG_EDGE_SNAP,
+          );
+        }
       }
 
       // calculate the snapping values when the velocity drops below 10
@@ -300,12 +323,20 @@ export const TileSlider = <T,>({
 
         const targetIndexFloat = -(sliderDataRef.current.position / tileWidth);
         const targetBuffer = 0.35;
-        const targetIndex = velocity > 0 ? Math.floor(targetIndexFloat - targetBuffer) : Math.ceil(targetIndexFloat + targetBuffer);
-        snappingTargetPosition = -(targetIndex * tileWidth);
-        snappingStartPosition = sliderDataRef.current.position;
+        const targetIndex = getIndexWithBoundary(
+          velocity > 0 ? Math.floor(targetIndexFloat - targetBuffer) : Math.ceil(targetIndexFloat + targetBuffer),
+        );
 
-        // this multiplier aligns pretty well maintaining the same velocity
-        snappingDuration = Math.min(2000, Math.abs(snappingTargetPosition - sliderDataRef.current.position) * 5);
+        if (cycleMode === CYCLE_MODE_STOP) {
+          snappingTargetPosition = -(Math.max(0, Math.min(totalTiles - tilesToShow, targetIndex)) * tileWidth);
+          snappingDuration = 500;
+        } else {
+          snappingTargetPosition = -(targetIndex * tileWidth);
+          // this multiplier aligns pretty well maintaining the same velocity
+          snappingDuration = Math.min(2000, Math.abs(snappingTargetPosition - sliderDataRef.current.position) * 5);
+        }
+
+        snappingStartPosition = sliderDataRef.current.position;
       }
 
       // apply the position
@@ -345,6 +376,7 @@ export const TileSlider = <T,>({
 
   const slideToIndex = useCallback(
     (index: number, closest = false) => {
+      index = getIndexWithBoundary(index);
       const itemIndex = getCircularIndex(state.index, items.length);
       const page = Math.floor(itemIndex / tilesToShow);
 
@@ -366,7 +398,7 @@ export const TileSlider = <T,>({
       });
       handleSnapping(index, stableAnimationFn);
     },
-    [handleSnapping, isMultiPage, items.length, onSlideStart, pages, stableAnimationFn, state.index, tilesToShow],
+    [getIndexWithBoundary, handleSnapping, isMultiPage, items.length, onSlideStart, pages, stableAnimationFn, state.index, tilesToShow],
   );
 
   const slideToPage = useCallback(
@@ -421,6 +453,21 @@ export const TileSlider = <T,>({
     });
   });
 
+  const getSliderDragPosition = (delta: number) => {
+    if (!isMultiPage) delta = clampWithEasing(delta, 0, 0, DRAG_EDGE_SNAP);
+    let position = sliderDataRef.current.position + delta;
+
+    if (isMultiPage && cycleMode === CYCLE_MODE_STOP) {
+      const tileWidth = sliderDataRef.current.frameWidth / tilesToShow;
+      const minPosition = -(totalTiles - tilesToShow) * tileWidth;
+      const maxPosition = 0;
+
+      position = clampWithEasing(position, minPosition, maxPosition, DRAG_EDGE_SNAP);
+    }
+
+    return position;
+  };
+
   const handleTouchMove = useEventCallback((event: TouchEvent) => {
     const newPosition = {
       x: event.changedTouches[0].clientX,
@@ -431,7 +478,7 @@ export const TileSlider = <T,>({
     sliderDataRef.current.moves = registerMove(sliderDataRef.current.moves, newPosition);
 
     // total movement
-    let delta: number = newPosition.x - origin.x;
+    const delta: number = newPosition.x - origin.x;
     const movementX: number = Math.abs(newPosition.x - origin.x);
     const movementY: number = Math.abs(newPosition.y - origin.y);
 
@@ -445,12 +492,7 @@ export const TileSlider = <T,>({
       event.stopPropagation();
 
       sliderDataRef.current.scrolling = true;
-
-      // snap to edges when there is nothing to scroll
-      if (!isMultiPage) delta = Math.max(-DRAG_EDGE_SNAP, Math.min(DRAG_EDGE_SNAP, delta));
-
-      // instead of absolute positioning, we could do `calc(${relativePosition}% + ${delta}px)`
-      frameRef.current.style.transform = `translateX(${sliderDataRef.current.position + delta}px)`;
+      frameRef.current.style.transform = `translateX(${getSliderDragPosition(delta)}px)`;
     }
   });
 
@@ -464,12 +506,9 @@ export const TileSlider = <T,>({
     // relative movement (velocity)
     const velocity = getVelocity(moves);
 
-    let delta: number = newPosition.x - origin.x;
+    const delta: number = newPosition.x - origin.x;
     const movementX: number = Math.abs(newPosition.x - origin.x);
     const movementY: number = Math.abs(newPosition.y - origin.y);
-
-    // snap to edges when there is nothing to scroll
-    if (!isMultiPage) delta = Math.max(-DRAG_EDGE_SNAP, Math.min(DRAG_EDGE_SNAP, delta));
 
     sliderDataRef.current.scrolling = false;
     sliderDataRef.current.velocity = 0;
@@ -478,7 +517,7 @@ export const TileSlider = <T,>({
       return handleVelocity();
     }
 
-    sliderDataRef.current.position += delta;
+    sliderDataRef.current.position = getSliderDragPosition(delta);
 
     // we slide when the movement was mostly horizontal
     if (movementX > movementY) {

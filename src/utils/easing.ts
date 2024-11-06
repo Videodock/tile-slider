@@ -28,3 +28,15 @@ export const easeInOut: AnimationFn = (currentTime, startValue, changeInValue, d
   currentTime--;
   return (-changeInValue / 2) * (currentTime * (currentTime - 2) - 1) + startValue;
 };
+
+export function clampWithEasing(value: number, minValue: number, maxValue: number, easingDistance = 50) {
+  if (value < minValue) {
+    return minValue - Math.min(easingDistance, easeOut(minValue - value, 0, easingDistance, easingDistance * 4));
+  }
+
+  if (value > maxValue) {
+    return Math.min(easingDistance, easeOut(value - maxValue, 0, easingDistance, easingDistance * 4));
+  }
+
+  return value;
+}
