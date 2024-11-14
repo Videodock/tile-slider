@@ -6,8 +6,11 @@ import { getCircularIndex } from './utils/math';
 import { clx } from './utils/clx';
 import { getVelocity, Position, registerMove, TouchMoves } from './utils/drag';
 
+// only render the given items once and stop sliding when reaching the beginning or end
 export const CYCLE_MODE_STOP = 'stop';
+// endless render items, but align to the first and last item when using the slide left/right controls
 export const CYCLE_MODE_RESTART = 'restart';
+// endless render items
 export const CYCLE_MODE_ENDLESS = 'endless';
 
 export const PREFERS_REDUCED_MOTION = typeof window !== 'undefined' ? !window.matchMedia('(prefers-reduced-motion)').matches : false;
@@ -263,7 +266,7 @@ export const TileSlider = <T,>({
    * tile.
    */
   const handleVelocity = useEventCallback(() => {
-    let startVelocity = sliderDataRef.current.velocity * 16;
+    const startVelocity = sliderDataRef.current.velocity * 16;
 
     // snap back to the current tile when the velocity is near zero
     if (Math.abs(startVelocity) < 1) {
@@ -433,10 +436,23 @@ export const TileSlider = <T,>({
   const slide = useCallback(
     (direction: Direction) => {
       const directionFactor = direction === 'right' ? 1 : -1;
+      let slideStepCount = stepCount;
 
-      slideToIndex(state.index + stepCount * directionFactor);
+      if (cycleMode === CYCLE_MODE_RESTART) {
+        const itemIndex = getCircularIndex(state.index, items.length);
+        const diffToLast = items.length - tilesToShow - itemIndex;
+        const diffToFirst = itemIndex;
+
+        // slide to the first/last item when exceeding
+        if (direction === 'right' && diffToLast !== 0) slideStepCount = Math.min(diffToLast, slideStepCount);
+        if (direction === 'left' && diffToFirst !== 0) slideStepCount = Math.min(diffToFirst, slideStepCount);
+      }
+
+      const toIndex = state.index + slideStepCount * directionFactor;
+
+      slideToIndex(toIndex);
     },
-    [slideToIndex, state.index, stepCount],
+    [cycleMode, items.length, slideToIndex, state.index, stepCount, tilesToShow],
   );
 
   useImperativeHandle(sliderRef, () => {

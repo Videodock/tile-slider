@@ -1,0 +1,78 @@
+---
+sidebar_position: 8
+---
+
+# Cycle Mode Restart
+
+## Example
+
+import { TileSlider, CYCLE_MODE_RESTART } from '../../../src';
+import { items, renderLeftControl, renderRightControl, renderTile } from '../helpers';
+import '../../../src/style.css';
+
+<h3>Pagination</h3>
+<TileSlider
+  tilesToShow={3}
+  cycleMode={CYCLE_MODE_RESTART}
+  renderTile={renderTile}
+  items={items.slice(0, 5)}
+  renderRightControl={renderRightControl}
+  renderLeftControl={renderLeftControl}
+/>
+<h3>No pagination</h3>
+<TileSlider
+  tilesToShow={3}
+  cycleMode={CYCLE_MODE_RESTART}
+  renderTile={renderTile}
+  items={items.slice(0, 2)}
+  renderRightControl={renderRightControl}
+  renderLeftControl={renderLeftControl}
+/>
+
+## Code
+
+```tsx
+import { TileSlider, type RenderTile, type RenderControl, CYCLE_MODE_STOP } from '@videodock/tile-slider';
+
+type Tile = {
+  title: string;
+  image: string;
+};
+
+// create example data set with 10 tiles
+const items: Tile[] = Array.from({ length: 10 }, (_, index) => ({
+  title: `Tile ${index}`,
+  image: `/img/${index}.jpg`,
+}));
+
+const renderTile: RenderTile<Tile> = ({ item, isVisible }) => (
+  <div className={'exampleTile'}>
+    <img src={item.image} alt={item.title} />
+  </div>
+);
+
+const renderLeftControl: RenderControl = ({ onClick }) => (
+  <button className="control" onClick={onClick}>
+    <IconLeft />
+  </button>
+);
+
+const renderRightControl: RenderControl = ({ onClick }) => (
+  <button className="control" onClick={onClick}>
+    <IconRight />
+  </button>
+);
+
+const Slider = () => {
+  return (
+    <TileSlider
+      cycleMode={CYCLE_MODE_RESTART}
+      tilesToShow={3}
+      renderTile={renderTile}
+      items={items}
+      renderRightControl={renderRightControl}
+      renderLeftControl={renderLeftControl}
+    />
+  );
+};
+```
