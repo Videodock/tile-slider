@@ -16,7 +16,8 @@
     "build": "rollup -c --bundleConfigAsCjs",
     "prepublishOnly": "yarn clean && yarn build",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
-    "lint": "prettier --check \"src/**/*.{js,jsx,ts,tsx}\""
+    "lint": "prettier --check \"src/**/*.{js,jsx,ts,tsx}\"",
+    "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.8",
@@ -26,6 +27,7 @@
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "confusing-browser-globals": "^1.0.11",
+    "conventional-changelog-cli": "^5.0.0",
     "eslint": "^8.57.1",
     "eslint-config-react": "^1.1.7",
     "eslint-plugin-import": "^2.31.0",
