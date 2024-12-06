@@ -16,10 +16,8 @@ jobs:
         with:
           registry-url: 'https://registry.npmjs.org'
           scope: '@videodock'
-      - name: Install and build TileSlider
-        run: |
-          yarn install
-          yarn build
+      - name: Install dependencies
+        run: yarn install
       - name: Publish to NPM
         run: yarn publish
         env:
