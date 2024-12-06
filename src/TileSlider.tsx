@@ -68,6 +68,13 @@ export type TileSliderProps<T> = {
   onSlideStart?: (props: CallbackProps) => void;
   onSlideEnd?: (props: CallbackProps) => void;
   overscan?: number;
+  classNames?: {
+    gestures?: string;
+    list?: string;
+    leftControl?: string;
+    rightControl?: string;
+    tile?: string;
+  };
 };
 
 export type TileSliderRef = {
@@ -91,6 +98,7 @@ export const TileSlider = <T,>({
   renderRightControl,
   renderPagination,
   className,
+  classNames = {},
   onSwipeStart,
   onSwipeEnd,
   onSlideStart,
@@ -595,7 +603,7 @@ export const TileSlider = <T,>({
     return (
       <li
         style={{ width: `${responsiveTileWidth}%`, paddingLeft: spacing / 2, paddingRight: spacing / 2 }}
-        className={isVisible ? 'TileSlider--visible' : 'TileSlider--hidden'}
+        className={clx(classNames.tile, isVisible ? 'TileSlider--visible' : 'TileSlider--hidden')}
         key={index}
         aria-hidden={!isVisible}
       >
@@ -613,7 +621,7 @@ export const TileSlider = <T,>({
       onClick: () => slide('left'),
       disabled: leftControlDisabled,
     });
-    return content && <div className="TileSlider-leftControl">{content}</div>;
+    return content && <div className={clx('TileSlider-leftControl', classNames.leftControl)}>{content}</div>;
   };
 
   const renderRightControlWrapper = () => {
@@ -621,14 +629,14 @@ export const TileSlider = <T,>({
       onClick: () => slide('right'),
       disabled: rightControlDisabled,
     });
-    return content && <div className="TileSlider-rightControl">{content}</div>;
+    return content && <div className={clx('TileSlider-rightControl', classNames.rightControl)}>{content}</div>;
   };
 
   return (
     <div className={clx('TileSlider', className)}>
       {needControls && renderLeftControlWrapper()}
-      <div className="TileSlider-gestures" style={{ marginLeft: -(spacing / 2), marginRight: -(spacing / 2) }} ref={gesturesRef}>
-        <ul className="TileSlider-list" ref={frameRef} style={{ left: `calc(${listOffset}%)` }}>
+      <div className={clx('TileSlider-gestures', classNames.gestures)} style={{ marginLeft: -(spacing / 2), marginRight: -(spacing / 2) }} ref={gesturesRef}>
+        <ul className={clx('TileSlider-list', classNames.list)} ref={frameRef} style={{ left: `calc(${listOffset}%)` }}>
           {renderTiles()}
         </ul>
       </div>
