@@ -17,7 +17,7 @@
     "prepublishOnly": "yarn clean && yarn build",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
     "lint": "prettier --check \"src/**/*.{js,jsx,ts,tsx}\"",
-    "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md"
+    "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md && node ./scripts/gh-release.mjs"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.8",
@@ -34,6 +34,8 @@
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-rulesdir": "^0.2.2",
+    "new-github-release-url": "^2.0.0",
+    "open": "^10.1.0",
     "postcss": "^8.4.49",
     "prettier": "^3.4.2",
     "rollup": "^4.28.0",
