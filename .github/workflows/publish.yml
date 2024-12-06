@@ -1,0 +1,26 @@
+name: Publish release to NPM
+run-name: Publish - ${{ github.ref }}
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@videodock'
+      - name: Install and build TileSlider
+        run: |
+          yarn install
+          yarn build
+      - name: Publish to NPM
+        run: yarn publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
