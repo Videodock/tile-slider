@@ -635,7 +635,11 @@ export const TileSlider = <T,>({
   return (
     <div className={clx('TileSlider', className)}>
       {needControls && renderLeftControlWrapper()}
-      <div className={clx('TileSlider-gestures', classNames.gestures)} style={{ marginLeft: -(spacing / 2), marginRight: -(spacing / 2) }} ref={gesturesRef}>
+      <div
+        className={clx('TileSlider-gestures', classNames.gestures)}
+        style={{ marginLeft: -(spacing / 2), marginRight: -(spacing / 2) }}
+        ref={gesturesRef}
+      >
         <ul className={clx('TileSlider-list', classNames.list)} ref={frameRef} style={{ left: `calc(${listOffset}%)` }}>
           {renderTiles()}
         </ul>
