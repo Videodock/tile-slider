@@ -91,6 +91,22 @@ const App: React.FC = () => {
 export default App;
 ```
 
+## Release
+
+To create a release, perform the following steps:
+
+Create a new version using `yarn version`. Follow [semver](https://semver.org/) rules to determine the next version.
+
+When the script completes, a page is automatically opened to create a new GitHub release with all information filled in.
+
+Before creating the GitHub release, the commit and tag must be pushed to GitHub. After doing so, refresh the new
+release page so it detects the existing tag. After creating the GitHub release, the version is automatically published
+to NPM.
+
+```shell
+$ yarn version
+```
+
 ## Documentation
 
 Run the documentation app, which showcases all features of the TileSlider package:
