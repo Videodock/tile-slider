@@ -1,3 +1,13 @@
+# [2.3.0](https://github.com/Videodock/tile-slider/compare/v2.2.0...v2.3.0) (2024-12-09)
+
+
+### Features
+
+* add support for cycle mode restart ([#126](https://github.com/Videodock/tile-slider/issues/126)) ([b20811d](https://github.com/Videodock/tile-slider/commit/b20811d5f3d5a5113370bf14572bfb5aa1a6ed71))
+* allow adding custom classnames ([89a6d38](https://github.com/Videodock/tile-slider/commit/89a6d38f594befbee4a69bf3af19c6653ad67df4))
+
+
+
 # [2.2.0](https://github.com/Videodock/tile-slider/compare/v2.1.1...v2.2.0) (2024-11-06)
 
 
