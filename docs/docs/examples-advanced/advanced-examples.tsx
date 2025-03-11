@@ -31,7 +31,7 @@ export const SliderWithState = () => {
         onSlideEnd={setState}
       />
       <code>
-        State: {JSON.stringify(state, null, 2)} <br/>
+        State: {JSON.stringify(state, null, 2)} <br />
         Circular index: {math.getCircularIndex(state.index, state.total)}
       </code>
     </>

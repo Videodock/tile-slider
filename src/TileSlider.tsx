@@ -83,7 +83,7 @@ export type TileSliderRef = {
   slideToPage: (page: number) => void;
 };
 
-export const TileSlider = <T, > ({
+export const TileSlider = <T,>({
   items,
   sliderRef,
   tilesToShow = 6,
@@ -468,13 +468,17 @@ export const TileSlider = <T, > ({
     [cycleMode, items.length, slideToIndex, state.index, stepCount, tilesToShow],
   );
 
-  useImperativeHandle(sliderRef, () => {
-    return {
-      slide,
-      slideToPage,
-      slideToIndex,
-    };
-  }, [slide, slideToIndex, slideToPage]);
+  useImperativeHandle(
+    sliderRef,
+    () => {
+      return {
+        slide,
+        slideToPage,
+        slideToIndex,
+      };
+    },
+    [slide, slideToIndex, slideToPage],
+  );
 
   const handleTouchStart = useEventCallback((event: TouchEvent): void => {
     sliderDataRef.current.origin = {

@@ -7,10 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": [
-      "lib",
-      "docs/build"
-    ]
+    "ignore": ["lib", "docs/build"]
   },
   "formatter": {
     "enabled": true,
@@ -153,12 +150,7 @@
         "noConsole": {
           "level": "error",
           "options": {
-            "allow": [
-              "warn",
-              "error",
-              "info",
-              "debug"
-            ]
+            "allow": ["warn", "error", "info", "debug"]
           }
         },
         "noControlCharactersInRegex": "error",
@@ -193,7 +185,7 @@
       "jsxQuoteStyle": "double",
       "quoteProperties": "asNeeded",
       "trailingCommas": "all",
-      "semicolons": "asNeeded",
+      "semicolons": "always",
       "arrowParentheses": "always",
       "bracketSameLine": false,
       "quoteStyle": "single",
@@ -203,18 +195,13 @@
   },
   "overrides": [
     {
-      "include": [
-        "*.js"
-      ],
+      "include": ["*.js"],
       "linter": {
         "rules": {}
       }
     },
     {
-      "include": [
-        "*.ts",
-        "*.tsx"
-      ],
+      "include": ["*.ts", "*.tsx"],
       "linter": {
         "rules": {
           "correctness": {
@@ -230,10 +217,7 @@
       }
     },
     {
-      "include": [
-        "*.jsx",
-        "*.tsx"
-      ],
+      "include": ["*.jsx", "*.tsx"],
       "linter": {
         "rules": {
           "correctness": {
@@ -254,12 +238,7 @@
       }
     },
     {
-      "include": [
-        "*.ts",
-        "*.tsx",
-        "*.mts",
-        "*.cts"
-      ],
+      "include": ["*.ts", "*.tsx", "*.mts", "*.cts"],
       "linter": {
         "rules": {
           "correctness": {
