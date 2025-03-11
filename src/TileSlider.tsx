@@ -83,7 +83,7 @@ export type TileSliderRef = {
   slideToPage: (page: number) => void;
 };
 
-export const TileSlider = <T,>({
+export const TileSlider = <T, > ({
   items,
   sliderRef,
   tilesToShow = 6,
@@ -105,8 +105,8 @@ export const TileSlider = <T,>({
   onSlideEnd,
   overscan = tilesToShow,
 }: TileSliderProps<T>) => {
-  const frameRef = useRef<HTMLUListElement>() as React.MutableRefObject<HTMLUListElement>;
-  const gesturesRef = useRef<HTMLDivElement>() as React.MutableRefObject<HTMLDivElement>;
+  const frameRef = useRef<HTMLUListElement>(null);
+  const gesturesRef = useRef<HTMLDivElement>(null);
   const responsiveTileWidth = 100 / tilesToShow;
   const isMultiPage: boolean = items.length > tilesToShow;
   const pages = Math.ceil(items.length / tilesToShow);
@@ -195,6 +195,7 @@ export const TileSlider = <T,>({
   });
 
   // this effect resets the position when the tilesToShow changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: we want this hook to react to tile changes
   useEffect(() => {
     handleResize();
   }, [handleResize, responsiveTileWidth, tilesToShow]);
@@ -214,7 +215,11 @@ export const TileSlider = <T,>({
 
     if (!animated) {
       setState((state) => ({ ...state, index, page, sliding: false }));
-      frameRef.current.style.transform = `translateX(${relativeToPosition}%)`;
+
+      if (frameRef.current) {
+        frameRef.current.style.transform = `translateX(${relativeToPosition}%)`;
+      }
+
       onSlideEnd?.({
         index: index,
         itemIndex: getCircularIndex(index, items.length),
@@ -536,7 +541,10 @@ export const TileSlider = <T,>({
       event.stopPropagation();
 
       sliderDataRef.current.scrolling = true;
-      frameRef.current.style.transform = `translateX(${getSliderDragPosition(delta)}px)`;
+
+      if (frameRef.current) {
+        frameRef.current.style.transform = `translateX(${getSliderDragPosition(delta)}px)`;
+      }
     }
   });
 
@@ -577,20 +585,20 @@ export const TileSlider = <T,>({
     const gesturesElement = gesturesRef.current;
 
     window.addEventListener('resize', handleResize);
-    gesturesElement.addEventListener('touchstart', handleTouchStart);
-    gesturesElement.addEventListener('touchmove', handleTouchMove, { passive: false });
-    gesturesElement.addEventListener('touchend', handleTouchEnd);
-    gesturesElement.addEventListener('touchcancel', handleTouchEnd);
+    gesturesElement?.addEventListener('touchstart', handleTouchStart);
+    gesturesElement?.addEventListener('touchmove', handleTouchMove, { passive: false });
+    gesturesElement?.addEventListener('touchend', handleTouchEnd);
+    gesturesElement?.addEventListener('touchcancel', handleTouchEnd);
 
     handleResize();
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      gesturesElement.removeEventListener('touchstart', handleTouchStart);
-      gesturesElement.removeEventListener('touchstart', handleTouchStart);
-      gesturesElement.removeEventListener('touchmove', handleTouchMove);
-      gesturesElement.removeEventListener('touchend', handleTouchEnd);
-      gesturesElement.removeEventListener('touchcancel', handleTouchEnd);
+      gesturesElement?.removeEventListener('touchstart', handleTouchStart);
+      gesturesElement?.removeEventListener('touchstart', handleTouchStart);
+      gesturesElement?.removeEventListener('touchmove', handleTouchMove);
+      gesturesElement?.removeEventListener('touchend', handleTouchEnd);
+      gesturesElement?.removeEventListener('touchcancel', handleTouchEnd);
     };
   }, [handleResize, handleTouchEnd, handleTouchMove, handleTouchStart]);
 
