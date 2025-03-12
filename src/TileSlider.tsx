@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, { type ReactElement, type ForwardedRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 import { useEventCallback } from './hooks/useEventCallback';
-import { AnimationFn, clampWithEasing, easeOut, easeOutQuartic } from './utils/easing';
-import { getCircularIndex } from './utils/math';
 import { clx } from './utils/clx';
-import { getVelocity, Position, registerMove, TouchMoves } from './utils/drag';
+import { type Position, type TouchMoves, getVelocity, registerMove } from './utils/drag';
+import { type AnimationFn, clampWithEasing, easeOut, easeOutQuartic } from './utils/easing';
+import { getCircularIndex } from './utils/math';
 
 // only render the given items once and stop sliding when reaching the beginning or end
 export const CYCLE_MODE_STOP = 'stop';
@@ -27,7 +27,7 @@ export type RenderTile<T> = (params: {
   isVisible: boolean;
   index: number;
   slide: (direction: Direction) => void;
-}) => React.ReactElement;
+}) => ReactElement;
 
 export type ControlProps = {
   onClick: () => void;
@@ -45,12 +45,12 @@ export type PaginationProps = {
 };
 export type CallbackProps = Omit<PaginationProps, 'slide' | 'slideToIndex' | 'slideToPage'>;
 
-export type RenderControl = (props: ControlProps) => React.ReactElement;
-export type RenderPagination = (props: PaginationProps) => React.ReactElement;
+export type RenderControl = (props: ControlProps) => ReactElement;
+export type RenderPagination = (props: PaginationProps) => ReactElement;
 
 export type TileSliderProps<T> = {
   items: T[];
-  sliderRef?: React.ForwardedRef<TileSliderRef>;
+  sliderRef?: ForwardedRef<TileSliderRef>;
   cycleMode?: CycleMode;
   tilesToShow?: number;
   spacing?: number;
@@ -180,7 +180,7 @@ export const TileSlider = <T,>({
   const getSliderPosition = useEventCallback(() => {
     const transform = frameRef.current ? getComputedStyle(frameRef.current).transform?.split(', ')[4] : '0';
 
-    return transform ? parseInt(transform) : 0;
+    return transform ? Number.parseInt(transform) : 0;
   });
 
   /**
@@ -189,7 +189,7 @@ export const TileSlider = <T,>({
   const handleResize = useEventCallback(() => {
     cancelAnimationFrame(sliderDataRef.current.animationId);
     if (frameRef.current) {
-      sliderDataRef.current.frameWidth = parseFloat(getComputedStyle(frameRef.current).width);
+      sliderDataRef.current.frameWidth = Number.parseFloat(getComputedStyle(frameRef.current).width);
       frameRef.current.style.transform = `translateX(${-responsiveTileWidth * state.index}%)`;
     }
   });
@@ -295,7 +295,7 @@ export const TileSlider = <T,>({
     // animation duration based on the velocity
     const startTime = Date.now();
     const tileWidth = sliderDataRef.current.frameWidth / tilesToShow;
-    const extraDuration = Math.pow(Math.abs(startVelocity), 2) / 3.5;
+    const extraDuration = Math.abs(startVelocity) ** 2 / 3.5;
     const totalDuration = DRAG_SNAPPING_DAMPING + extraDuration;
 
     let finished = false;
