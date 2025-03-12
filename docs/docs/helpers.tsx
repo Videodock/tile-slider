@@ -65,7 +65,9 @@ export const renderPagination: RenderPagination = (props) => {
     <ul className="paginationDots">
       {pages.map((page) => (
         <li key={page} className={props.page === page ? 'activeDot' : ''}>
-          <button type="button" onClick={() => props.slideToPage(page)}>&#9679;</button>
+          <button type="button" onClick={() => props.slideToPage(page)}>
+            &#9679;
+          </button>
         </li>
       ))}
     </ul>
@@ -110,9 +112,7 @@ export function easeOutElastic(currentTime: number, startValue: number, changeIn
   const s = p / 4;
 
   return (
-    changeInValue * 2 ** (-10 * currentTime) * Math.sin(((currentTime * duration - s) * (2 * Math.PI)) / p) +
-    changeInValue +
-    startValue
+    changeInValue * 2 ** (-10 * currentTime) * Math.sin(((currentTime * duration - s) * (2 * Math.PI)) / p) + changeInValue + startValue
   );
 }
 
@@ -131,9 +131,13 @@ export const WithDynamicPropsExample = () => {
         renderLeftControl={renderLeftControl}
       />
       <label htmlFor="input">Tiles to show: </label>
-      <button type="button" onClick={() => setState({ tilesToShow: state.tilesToShow - 1 })}>-</button>
+      <button type="button" onClick={() => setState({ tilesToShow: state.tilesToShow - 1 })}>
+        -
+      </button>
       <input value={state.tilesToShow} style={{ width: 40, textAlign: 'center' }} name="input" />
-      <button type="button" onClick={() => setState({ tilesToShow: state.tilesToShow + 1 })}>+</button>
+      <button type="button" onClick={() => setState({ tilesToShow: state.tilesToShow + 1 })}>
+        +
+      </button>
     </>
   );
 };
@@ -168,22 +172,38 @@ export const WithRefExample = () => {
       <div>
         <strong>slide(direction: &apos;left&apos; | &apos;right&apos;)</strong>
         <br />
-        <button type="button" onClick={() => tileSliderRef.current?.slide('left')}>Slide left</button>{' '}
-        <button type="button" onClick={() => tileSliderRef.current?.slide('right')}>Slide right</button>
+        <button type="button" onClick={() => tileSliderRef.current?.slide('left')}>
+          Slide left
+        </button>{' '}
+        <button type="button" onClick={() => tileSliderRef.current?.slide('right')}>
+          Slide right
+        </button>
       </div>
       <div>
         <strong>slideToIndex(index: number)</strong>
         <br />
-        <button type="button" onClick={() => tileSliderRef.current?.slideToIndex(0)}>Slide to index: 0</button>{' '}
-        <button type="button" onClick={() => tileSliderRef.current?.slideToIndex(10)}>Slide to index: 10</button>{' '}
-        <button type="button" onClick={() => tileSliderRef.current?.slideToIndex(100)}>Slide to index: 100</button>
-        <button type="button" onClick={() => tileSliderRef.current?.slideToIndex(105, true)}>Slide to index: 105 (closest)</button>
+        <button type="button" onClick={() => tileSliderRef.current?.slideToIndex(0)}>
+          Slide to index: 0
+        </button>{' '}
+        <button type="button" onClick={() => tileSliderRef.current?.slideToIndex(10)}>
+          Slide to index: 10
+        </button>{' '}
+        <button type="button" onClick={() => tileSliderRef.current?.slideToIndex(100)}>
+          Slide to index: 100
+        </button>
+        <button type="button" onClick={() => tileSliderRef.current?.slideToIndex(105, true)}>
+          Slide to index: 105 (closest)
+        </button>
       </div>
       <div>
         <strong>slideToPage(page: number)</strong>
         <br />
-        <button type="button" onClick={() => tileSliderRef.current?.slideToPage(0)}>Slide to page 0</button>{' '}
-        <button type="button" onClick={() => tileSliderRef.current?.slideToPage(3)}>Slide to page 3</button>
+        <button type="button" onClick={() => tileSliderRef.current?.slideToPage(0)}>
+          Slide to page 0
+        </button>{' '}
+        <button type="button" onClick={() => tileSliderRef.current?.slideToPage(3)}>
+          Slide to page 3
+        </button>
       </div>
     </>
   );

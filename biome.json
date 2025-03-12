@@ -1,21 +1,14 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
   "vcs": {
-    "enabled": false,
+    "enabled": true,
     "clientKind": "git",
-    "useIgnoreFile": false
-  },
-  "files": {
-    "ignoreUnknown": false,
-    "ignore": ["lib", "docs/build"]
+    "useIgnoreFile": true
   },
   "formatter": {
     "enabled": true,
     "useEditorconfig": true,
     "formatWithErrors": false,
-    "indentStyle": "space",
-    "indentWidth": 2,
-    "lineEnding": "lf",
     "lineWidth": 140,
     "attributePosition": "auto",
     "bracketSpacing": true
@@ -30,117 +23,8 @@
       "a11y": {
         "noBlankTarget": "error"
       },
-      "complexity": {
-        "noBannedTypes": "error",
-        "noExtraBooleanCast": "error",
-        "noMultipleSpacesInRegularExpressionLiterals": "error",
-        "noUselessCatch": "error",
-        "noUselessTypeConstraint": "error",
-        "noWith": "error"
-      },
-      "correctness": {
-        "noChildrenProp": "error",
-        "noConstAssign": "error",
-        "noConstantCondition": "error",
-        "noEmptyCharacterClassInRegex": "error",
-        "noEmptyPattern": "error",
-        "noGlobalObjectCalls": "error",
-        "noInnerDeclarations": "error",
-        "noInvalidConstructorSuper": "error",
-        "noNewSymbol": "error",
-        "noNonoctalDecimalEscape": "error",
-        "noPrecisionLoss": "error",
-        "noSelfAssign": "error",
-        "noSetterReturn": "error",
-        "noSwitchDeclarations": "error",
-        "noUndeclaredVariables": "error",
-        "noUnreachable": "error",
-        "noUnreachableSuper": "error",
-        "noUnsafeFinally": "error",
-        "noUnsafeOptionalChaining": "error",
-        "noUnusedLabels": "error",
-        "noUnusedVariables": "warn",
-        "useArrayLiterals": "off",
-        "useIsNan": "error",
-        "useJsxKeyInIterable": "error",
-        "useValidForDirection": "error",
-        "useYield": "error"
-      },
-      "security": {
-        "noDangerouslySetInnerHtmlWithChildren": "error"
-      },
       "style": {
-        "noParameterAssign": "off",
-        "noInferrableTypes": "error",
-        "noNamespace": "error",
-        "noNonNullAssertion": "warn",
-        "useTemplate": "error",
-        "noRestrictedGlobals": {
-          "level": "error",
-          "options": {
-            "deniedGlobals": [
-              "addEventListener",
-              "blur",
-              "close",
-              "closed",
-              "confirm",
-              "defaultStatus",
-              "defaultstatus",
-              "event",
-              "external",
-              "find",
-              "focus",
-              "frameElement",
-              "frames",
-              "history",
-              "innerHeight",
-              "innerWidth",
-              "length",
-              "location",
-              "locationbar",
-              "menubar",
-              "moveBy",
-              "moveTo",
-              "name",
-              "onblur",
-              "onerror",
-              "onfocus",
-              "onload",
-              "onresize",
-              "onunload",
-              "open",
-              "opener",
-              "opera",
-              "outerHeight",
-              "outerWidth",
-              "pageXOffset",
-              "pageYOffset",
-              "parent",
-              "print",
-              "removeEventListener",
-              "resizeBy",
-              "resizeTo",
-              "screen",
-              "screenLeft",
-              "screenTop",
-              "screenX",
-              "screenY",
-              "scroll",
-              "scrollbars",
-              "scrollBy",
-              "scrollTo",
-              "scrollX",
-              "scrollY",
-              "self",
-              "status",
-              "statusbar",
-              "stop",
-              "toolbar",
-              "top"
-            ]
-          }
-        },
-        "useAsConstAssertion": "error"
+        "noParameterAssign": "off"
       }
     }
   },

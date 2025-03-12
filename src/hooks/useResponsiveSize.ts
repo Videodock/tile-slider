@@ -42,10 +42,14 @@ export const useResponsiveSize = (sizes: ResponseConfig[]): number[] => {
       setSize(getSize());
     };
 
-    for (const matchMedia of mediaQueries) { matchMedia.addEventListener('change', handleChange); }
+    for (const matchMedia of mediaQueries) {
+      matchMedia.addEventListener('change', handleChange);
+    }
 
     return () => {
-      for (const matchMedia of mediaQueries) { matchMedia.removeEventListener('change', handleChange); }
+      for (const matchMedia of mediaQueries) {
+        matchMedia.removeEventListener('change', handleChange);
+      }
     };
   }, []);
 
