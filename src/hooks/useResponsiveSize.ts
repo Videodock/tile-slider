@@ -28,7 +28,8 @@ const getSize = (): Sizes => {
   if (sm.matches) return 'sm';
   if (md.matches) return 'md';
   if (lg.matches) return 'lg';
-  else return 'xl';
+
+  return 'xl';
 };
 
 export const useResponsiveSize = (sizes: ResponseConfig[]): number[] => {
@@ -41,10 +42,10 @@ export const useResponsiveSize = (sizes: ResponseConfig[]): number[] => {
       setSize(getSize());
     };
 
-    mediaQueries.forEach((matchMedia) => matchMedia.addEventListener('change', handleChange));
+    for (const matchMedia of mediaQueries) { matchMedia.addEventListener('change', handleChange); }
 
     return () => {
-      mediaQueries.forEach((matchMedia) => matchMedia.removeEventListener('change', handleChange));
+      for (const matchMedia of mediaQueries) { matchMedia.removeEventListener('change', handleChange); }
     };
   }, []);
 
