@@ -1,7 +1,7 @@
-import React, { useRef, useState } from 'react';
 import siteConfig from '@generated/docusaurus.config';
+import React, { useRef, useState } from 'react';
 
-import { RenderControl, RenderPagination, RenderTile, TileSlider, TileSliderRef } from '../../src';
+import { type RenderControl, type RenderPagination, type RenderTile, TileSlider, type TileSliderRef } from '../../src';
 
 export type Tile = {
   title: string;
@@ -23,23 +23,23 @@ const images = [
 
 export const IconLeft = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path>
+    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
   </svg>
 );
 
 export const IconRight = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
+    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
   </svg>
 );
 
-export const renderTile: RenderTile<Tile> = ({ item, isVisible }) => (
+export const renderTile: RenderTile<Tile> = ({ item }) => (
   <div className={'exampleTile'}>
     <img src={item.image} alt={item.title} />
   </div>
 );
 
-export const renderTileWithTitle: RenderTile<Tile> = ({ item, isVisible }) => (
+export const renderTileWithTitle: RenderTile<Tile> = ({ item }) => (
   <div className={'exampleTile'}>
     <img src={item.image} alt={item.title} />
     <div>{item.title}</div>
@@ -47,13 +47,13 @@ export const renderTileWithTitle: RenderTile<Tile> = ({ item, isVisible }) => (
 );
 
 export const renderLeftControl: RenderControl = ({ onClick }) => (
-  <button className="control" onClick={onClick}>
+  <button className="control" type="button" onClick={onClick}>
     <IconLeft />
   </button>
 );
 
 export const renderRightControl: RenderControl = ({ onClick }) => (
-  <button className="control" onClick={onClick}>
+  <button className="control" type="button" onClick={onClick}>
     <IconRight />
   </button>
 );
@@ -64,8 +64,10 @@ export const renderPagination: RenderPagination = (props) => {
   return (
     <ul className="paginationDots">
       {pages.map((page) => (
-        <li key={page} className={props.page === page ? 'activeDot' : ''} onClick={() => props.slideToPage(page)}>
-          &#9679;
+        <li key={page} className={props.page === page ? 'activeDot' : ''}>
+          <button type="button" onClick={() => props.slideToPage(page)}>
+            &#9679;
+          </button>
         </li>
       ))}
     </ul>
@@ -75,10 +77,10 @@ export const renderPagination: RenderPagination = (props) => {
 export const renderCustomPagination: RenderPagination = (props) => {
   return (
     <div>
-      <button className="button button--primary margin-right--md" onClick={() => props.slideToIndex(0)}>
+      <button className="button button--primary margin-right--md" type="button" onClick={() => props.slideToIndex(0)}>
         Slide 0
       </button>
-      <button className="button button--primary" onClick={() => props.slideToIndex(100)}>
+      <button className="button button--primary" type="button" onClick={() => props.slideToIndex(100)}>
         Slide 100
       </button>
     </div>
@@ -101,7 +103,8 @@ export function easeOutElastic(currentTime: number, startValue: number, changeIn
   if (currentTime === 0) {
     return startValue;
   }
-  if ((currentTime /= duration) === 1) {
+  currentTime /= duration;
+  if (currentTime === 1) {
     return startValue + changeInValue;
   }
 
@@ -109,14 +112,12 @@ export function easeOutElastic(currentTime: number, startValue: number, changeIn
   const s = p / 4;
 
   return (
-    changeInValue * Math.pow(2, -10 * currentTime) * Math.sin(((currentTime * duration - s) * (2 * Math.PI)) / p) +
-    changeInValue +
-    startValue
+    changeInValue * 2 ** (-10 * currentTime) * Math.sin(((currentTime * duration - s) * (2 * Math.PI)) / p) + changeInValue + startValue
   );
 }
 
 export const WithDynamicPropsExample = () => {
-  const tileSliderRef = useRef<TileSliderRef>();
+  const tileSliderRef = useRef<TileSliderRef>(null);
   const [state, setState] = useState({ tilesToShow: 3 });
 
   return (
@@ -129,16 +130,20 @@ export const WithDynamicPropsExample = () => {
         renderRightControl={renderRightControl}
         renderLeftControl={renderLeftControl}
       />
-      <label>Tiles to show: </label>
-      <button onClick={() => setState({ tilesToShow: state.tilesToShow - 1 })}>-</button>
-      <input value={state.tilesToShow} style={{ width: 40, textAlign: 'center' }} />
-      <button onClick={() => setState({ tilesToShow: state.tilesToShow + 1 })}>+</button>
+      <label htmlFor="input">Tiles to show: </label>
+      <button type="button" onClick={() => setState({ tilesToShow: state.tilesToShow - 1 })}>
+        -
+      </button>
+      <input value={state.tilesToShow} style={{ width: 40, textAlign: 'center' }} name="input" />
+      <button type="button" onClick={() => setState({ tilesToShow: state.tilesToShow + 1 })}>
+        +
+      </button>
     </>
   );
 };
 
 export const WithRefExample = () => {
-  const tileSliderRef = useRef<TileSliderRef>();
+  const tileSliderRef = useRef<TileSliderRef>(null);
   const [state, setState] = useState({ index: 0, itemIndex: 0, page: 0 });
 
   return (
@@ -155,34 +160,50 @@ export const WithRefExample = () => {
       <hr />
       <h3>State</h3>
       <div>
-        <label>Current index:</label> {state.index}{' '}
+        <strong>Current index:</strong> {state.index}{' '}
       </div>
       <div>
-        <label>Current item index:</label> {state.itemIndex}{' '}
+        <strong>Current item index:</strong> {state.itemIndex}{' '}
       </div>
       <div>
-        <label>Current page:</label> {state.page}
+        <strong>Current page:</strong> {state.page}
       </div>
       <h3>Controls</h3>
       <div>
         <strong>slide(direction: &apos;left&apos; | &apos;right&apos;)</strong>
         <br />
-        <button onClick={() => tileSliderRef.current?.slide('left')}>Slide left</button>{' '}
-        <button onClick={() => tileSliderRef.current?.slide('right')}>Slide right</button>
+        <button type="button" onClick={() => tileSliderRef.current?.slide('left')}>
+          Slide left
+        </button>{' '}
+        <button type="button" onClick={() => tileSliderRef.current?.slide('right')}>
+          Slide right
+        </button>
       </div>
       <div>
         <strong>slideToIndex(index: number)</strong>
         <br />
-        <button onClick={() => tileSliderRef.current?.slideToIndex(0)}>Slide to index: 0</button>{' '}
-        <button onClick={() => tileSliderRef.current?.slideToIndex(10)}>Slide to index: 10</button>{' '}
-        <button onClick={() => tileSliderRef.current?.slideToIndex(100)}>Slide to index: 100</button>
-        <button onClick={() => tileSliderRef.current?.slideToIndex(105, true)}>Slide to index: 105 (closest)</button>
+        <button type="button" onClick={() => tileSliderRef.current?.slideToIndex(0)}>
+          Slide to index: 0
+        </button>{' '}
+        <button type="button" onClick={() => tileSliderRef.current?.slideToIndex(10)}>
+          Slide to index: 10
+        </button>{' '}
+        <button type="button" onClick={() => tileSliderRef.current?.slideToIndex(100)}>
+          Slide to index: 100
+        </button>
+        <button type="button" onClick={() => tileSliderRef.current?.slideToIndex(105, true)}>
+          Slide to index: 105 (closest)
+        </button>
       </div>
       <div>
         <strong>slideToPage(page: number)</strong>
         <br />
-        <button onClick={() => tileSliderRef.current?.slideToPage(0)}>Slide to page 0</button>{' '}
-        <button onClick={() => tileSliderRef.current?.slideToPage(3)}>Slide to page 3</button>
+        <button type="button" onClick={() => tileSliderRef.current?.slideToPage(0)}>
+          Slide to page 0
+        </button>{' '}
+        <button type="button" onClick={() => tileSliderRef.current?.slideToPage(3)}>
+          Slide to page 3
+        </button>
       </div>
     </>
   );

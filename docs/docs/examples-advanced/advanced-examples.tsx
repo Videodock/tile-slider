@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { math, TileSlider, useResponsiveSize } from '../../../src';
+import { TileSlider, math, useResponsiveSize } from '../../../src';
 import { items, renderLeftControl, renderRightControl, renderTile } from '../helpers';
 import '../../../src/style.css';
 
@@ -31,7 +31,7 @@ export const SliderWithState = () => {
         onSlideEnd={setState}
       />
       <code>
-        State: {JSON.stringify(state, null, 2)} <br/>
+        State: {JSON.stringify(state, null, 2)} <br />
         Circular index: {math.getCircularIndex(state.index, state.total)}
       </code>
     </>

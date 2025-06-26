@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, { type ReactElement, type ForwardedRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 import { useEventCallback } from './hooks/useEventCallback';
-import { AnimationFn, clampWithEasing, easeOut, easeOutQuartic } from './utils/easing';
-import { getCircularIndex } from './utils/math';
 import { clx } from './utils/clx';
-import { getVelocity, Position, registerMove, TouchMoves } from './utils/drag';
+import { type Position, type TouchMoves, getVelocity, registerMove } from './utils/drag';
+import { type AnimationFn, clampWithEasing, easeOut, easeOutQuartic } from './utils/easing';
+import { getCircularIndex } from './utils/math';
 
 // only render the given items once and stop sliding when reaching the beginning or end
 export const CYCLE_MODE_STOP = 'stop';
@@ -27,7 +27,7 @@ export type RenderTile<T> = (params: {
   isVisible: boolean;
   index: number;
   slide: (direction: Direction) => void;
-}) => React.ReactElement;
+}) => ReactElement;
 
 export type ControlProps = {
   onClick: () => void;
@@ -45,12 +45,12 @@ export type PaginationProps = {
 };
 export type CallbackProps = Omit<PaginationProps, 'slide' | 'slideToIndex' | 'slideToPage'>;
 
-export type RenderControl = (props: ControlProps) => React.ReactElement;
-export type RenderPagination = (props: PaginationProps) => React.ReactElement;
+export type RenderControl = (props: ControlProps) => ReactElement;
+export type RenderPagination = (props: PaginationProps) => ReactElement;
 
 export type TileSliderProps<T> = {
   items: T[];
-  sliderRef?: React.ForwardedRef<TileSliderRef>;
+  sliderRef?: ForwardedRef<TileSliderRef>;
   cycleMode?: CycleMode;
   tilesToShow?: number;
   spacing?: number;
@@ -105,8 +105,8 @@ export const TileSlider = <T,>({
   onSlideEnd,
   overscan = tilesToShow,
 }: TileSliderProps<T>) => {
-  const frameRef = useRef<HTMLUListElement>() as React.MutableRefObject<HTMLUListElement>;
-  const gesturesRef = useRef<HTMLDivElement>() as React.MutableRefObject<HTMLDivElement>;
+  const frameRef = useRef<HTMLUListElement>(null);
+  const gesturesRef = useRef<HTMLDivElement>(null);
   const responsiveTileWidth = 100 / tilesToShow;
   const isMultiPage: boolean = items.length > tilesToShow;
   const pages = Math.ceil(items.length / tilesToShow);
@@ -180,7 +180,7 @@ export const TileSlider = <T,>({
   const getSliderPosition = useEventCallback(() => {
     const transform = frameRef.current ? getComputedStyle(frameRef.current).transform?.split(', ')[4] : '0';
 
-    return transform ? parseInt(transform) : 0;
+    return transform ? Number.parseInt(transform) : 0;
   });
 
   /**
@@ -189,12 +189,13 @@ export const TileSlider = <T,>({
   const handleResize = useEventCallback(() => {
     cancelAnimationFrame(sliderDataRef.current.animationId);
     if (frameRef.current) {
-      sliderDataRef.current.frameWidth = parseFloat(getComputedStyle(frameRef.current).width);
+      sliderDataRef.current.frameWidth = Number.parseFloat(getComputedStyle(frameRef.current).width);
       frameRef.current.style.transform = `translateX(${-responsiveTileWidth * state.index}%)`;
     }
   });
 
   // this effect resets the position when the tilesToShow changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: we want this hook to react to tile changes
   useEffect(() => {
     handleResize();
   }, [handleResize, responsiveTileWidth, tilesToShow]);
@@ -214,7 +215,11 @@ export const TileSlider = <T,>({
 
     if (!animated) {
       setState((state) => ({ ...state, index, page, sliding: false }));
-      frameRef.current.style.transform = `translateX(${relativeToPosition}%)`;
+
+      if (frameRef.current) {
+        frameRef.current.style.transform = `translateX(${relativeToPosition}%)`;
+      }
+
       onSlideEnd?.({
         index: index,
         itemIndex: getCircularIndex(index, items.length),
@@ -290,7 +295,7 @@ export const TileSlider = <T,>({
     // animation duration based on the velocity
     const startTime = Date.now();
     const tileWidth = sliderDataRef.current.frameWidth / tilesToShow;
-    const extraDuration = Math.pow(Math.abs(startVelocity), 2) / 3.5;
+    const extraDuration = Math.abs(startVelocity) ** 2 / 3.5;
     const totalDuration = DRAG_SNAPPING_DAMPING + extraDuration;
 
     let finished = false;
@@ -463,13 +468,17 @@ export const TileSlider = <T,>({
     [cycleMode, items.length, slideToIndex, state.index, stepCount, tilesToShow],
   );
 
-  useImperativeHandle(sliderRef, () => {
-    return {
-      slide,
-      slideToPage,
-      slideToIndex,
-    };
-  }, [slide, slideToIndex, slideToPage]);
+  useImperativeHandle(
+    sliderRef,
+    () => {
+      return {
+        slide,
+        slideToPage,
+        slideToIndex,
+      };
+    },
+    [slide, slideToIndex, slideToPage],
+  );
 
   const handleTouchStart = useEventCallback((event: TouchEvent): void => {
     sliderDataRef.current.origin = {
@@ -536,7 +545,10 @@ export const TileSlider = <T,>({
       event.stopPropagation();
 
       sliderDataRef.current.scrolling = true;
-      frameRef.current.style.transform = `translateX(${getSliderDragPosition(delta)}px)`;
+
+      if (frameRef.current) {
+        frameRef.current.style.transform = `translateX(${getSliderDragPosition(delta)}px)`;
+      }
     }
   });
 
@@ -577,20 +589,20 @@ export const TileSlider = <T,>({
     const gesturesElement = gesturesRef.current;
 
     window.addEventListener('resize', handleResize);
-    gesturesElement.addEventListener('touchstart', handleTouchStart);
-    gesturesElement.addEventListener('touchmove', handleTouchMove, { passive: false });
-    gesturesElement.addEventListener('touchend', handleTouchEnd);
-    gesturesElement.addEventListener('touchcancel', handleTouchEnd);
+    gesturesElement?.addEventListener('touchstart', handleTouchStart);
+    gesturesElement?.addEventListener('touchmove', handleTouchMove, { passive: false });
+    gesturesElement?.addEventListener('touchend', handleTouchEnd);
+    gesturesElement?.addEventListener('touchcancel', handleTouchEnd);
 
     handleResize();
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      gesturesElement.removeEventListener('touchstart', handleTouchStart);
-      gesturesElement.removeEventListener('touchstart', handleTouchStart);
-      gesturesElement.removeEventListener('touchmove', handleTouchMove);
-      gesturesElement.removeEventListener('touchend', handleTouchEnd);
-      gesturesElement.removeEventListener('touchcancel', handleTouchEnd);
+      gesturesElement?.removeEventListener('touchstart', handleTouchStart);
+      gesturesElement?.removeEventListener('touchstart', handleTouchStart);
+      gesturesElement?.removeEventListener('touchmove', handleTouchMove);
+      gesturesElement?.removeEventListener('touchend', handleTouchEnd);
+      gesturesElement?.removeEventListener('touchcancel', handleTouchEnd);
     };
   }, [handleResize, handleTouchEnd, handleTouchMove, handleTouchStart]);
 

@@ -40,7 +40,7 @@
 }
 
 .exampleTile > img {
-  aspect-ratio: 16/9;
+  aspect-ratio: 16 / 9;
   border-radius: 5px;
   width: 100%;
   height: 100%;
@@ -111,7 +111,13 @@
   bottom: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to right, var(--ifm-background-color) 0, rgba(0, 0, 0, 0) 56px,  rgba(0, 0, 0, 0) calc(100% - 56px), var(--ifm-background-color) 100%);
+  background: linear-gradient(
+    to right,
+    var(--ifm-background-color) 0,
+    rgba(0, 0, 0, 0) 56px,
+    rgba(0, 0, 0, 0) calc(100% - 56px),
+    var(--ifm-background-color) 100%
+  );
   opacity: 0.65;
   pointer-events: none;
   content: '';
