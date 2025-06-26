@@ -1,16 +1,16 @@
-import React from 'react';
-import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
-import Layout from '@theme/Layout';
+import { type Tile, items, renderLeftControl, renderRightControl } from '@site/docs/helpers';
 import Heading from '@theme/Heading';
-import { items, renderLeftControl, renderRightControl, type Tile } from '@site/docs/helpers';
+import Layout from '@theme/Layout';
+import clsx from 'clsx';
+import React from 'react';
 
-import { TileSlider, type RenderTile } from '../../../src';
+import { type RenderTile, TileSlider } from '../../../src';
 import '../../../src/style.css';
 
-import styles from './index.module.css';
 import { Document } from 'postcss';
+import styles from './index.module.css';
 
 const renderTile: RenderTile<Tile> = ({ item, isVisible }) => {
   return (
@@ -48,7 +48,7 @@ function HomepageHeader() {
   );
 }
 
-export default function Home(): JSX.Element {
+export default function Home() {
   const { siteConfig } = useDocusaurusContext();
   return (
     <Layout title={`Hello from ${siteConfig.title}`} description="Description will go into a meta tag in <head />">
