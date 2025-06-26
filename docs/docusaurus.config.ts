@@ -35,7 +35,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          editUrl: 'https://github.com/videodock/tile-slider/tree/main/docs',
+          editUrl: 'https://github.com/videodock/tile-slider/tree/next/docs',
         },
         theme: {
           customCss: './src/css/custom.css',
