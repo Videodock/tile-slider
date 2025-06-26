@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
 import siteConfig from '@generated/docusaurus.config';
+import React, { useRef, useState } from 'react';
 
 import { type RenderControl, type RenderPagination, type RenderTile, TileSlider, type TileSliderRef } from '../../src';
 

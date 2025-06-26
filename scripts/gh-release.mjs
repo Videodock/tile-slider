@@ -2,8 +2,8 @@ import child_process from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import open from 'open';
 import createReleaseUrl from 'new-github-release-url';
+import open from 'open';
 
 const output = child_process.execSync('npx conventional-changelog -p angular -r 1');
 

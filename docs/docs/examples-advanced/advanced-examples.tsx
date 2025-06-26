@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { math, TileSlider, useResponsiveSize } from '../../../src';
+import { TileSlider, math, useResponsiveSize } from '../../../src';
 import { items, renderLeftControl, renderRightControl, renderTile } from '../helpers';
 import '../../../src/style.css';
 

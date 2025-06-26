@@ -1,4 +1,4 @@
-import { useCallback, useRef, useInsertionEffect } from 'react';
+import { useCallback, useInsertionEffect, useRef } from 'react';
 
 // biome-ignore lint/suspicious/noExplicitAny: we don't know the arguments ¯\_(ツ)_/¯
 export const useEventCallback = <T extends (...args: any[]) => unknown>(fn: T) => {

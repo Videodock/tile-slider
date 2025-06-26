@@ -15,8 +15,9 @@
     "clean": "rimraf lib",
     "build": "rollup -c --bundleConfigAsCjs",
     "prepublishOnly": "yarn clean && yarn build",
-    "format": "yarn biome format --write",
-    "lint": " yarn biome lint --write",
+    "format": "yarn biome check --write",
+    "lint": " yarn biome lint",
+    "lint:fix": " yarn biome lint --write",
     "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md && node ./scripts/gh-release.mjs"
   },
   "devDependencies": {
