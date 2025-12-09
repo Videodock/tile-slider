@@ -44,7 +44,7 @@ jobs:
           BASE_URL: /tile-slider/
         working-directory: docs
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           # Upload entire repository
           path: 'docs/build'
