@@ -42,5 +42,8 @@
   "peerDependencies": {
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0"
+  },
+  "resolutions": {
+    "@conventional-changelog/git-client": "2.5.1"
   }
 }
