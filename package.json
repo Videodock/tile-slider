@@ -15,16 +15,17 @@
   "scripts": {
     "clean": "rimraf lib",
     "build": "rollup -c --bundleConfigAsCjs",
-    "prepublishOnly": "yarn clean && yarn build",
-    "format": "yarn biome check --write",
-    "lint": "yarn biome lint",
-    "lint:fix": "yarn biome lint --write",
+    "prepublishOnly": "pnpm clean && pnpm build",
+    "format": "biome check --write",
+    "lint": "biome lint",
+    "lint:fix": "biome lint --write",
     "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md && node ./scripts/gh-release.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@rollup/plugin-commonjs": "^29.0.3",
     "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-typescript": "^12.3.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "confusing-browser-globals": "^1.0.11",
@@ -37,7 +38,6 @@
     "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-import-css": "^3.5.8",
     "rollup-plugin-peer-deps-external": "^2.2.4",
-    "rollup-plugin-typescript2": "^0.36.0",
     "typescript": "^5.9.3"
   },
   "peerDependencies": {

@@ -31,15 +31,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '24'
+          node-version: "24"
       - name: Install and build TileSlider
         run: |
-          yarn install
-          yarn build
+          pnpm install
+          pnpm build
       - name: Install and build docs
         run: |
-          yarn install
-          yarn build
+          pnpm install
+          pnpm build
         env:
           BASE_URL: /tile-slider/
         working-directory: docs
@@ -47,7 +47,7 @@ jobs:
         uses: actions/upload-pages-artifact@v4
         with:
           # Upload entire repository
-          path: 'docs/build'
+          path: "docs/build"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
