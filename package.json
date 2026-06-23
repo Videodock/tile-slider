@@ -43,10 +43,5 @@
   "peerDependencies": {
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0"
-  },
-  "resolutions": {
-    "@conventional-changelog/git-client": "2.5.1",
-    "minimatch": "^10.2.3",
-    "@isaacs/brace-expansion": "^5.0.1"
   }
 }
