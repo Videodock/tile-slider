@@ -13,6 +13,8 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: "24"
+      - name: Install pnpm
+        uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d # v6.0.5
       - name: Install dependencies
         run: pnpm install
       - name: Lint
