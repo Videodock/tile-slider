@@ -95,7 +95,7 @@ export default App;
 
 To create a release, perform the following steps:
 
-Create a new version using `yarn version`. Follow [semver](https://semver.org/) rules to determine the next version.
+Create a new version using `pnpm version`. Follow [semver](https://semver.org/) rules to determine the next version.
 
 When the script completes, a page is automatically opened to create a new GitHub release with all information filled in.
 
@@ -104,7 +104,7 @@ release page so it detects the existing tag. After creating the GitHub release, 
 to NPM.
 
 ```shell
-$ yarn version
+$ pnpm version
 ```
 
 ## Documentation
@@ -113,12 +113,12 @@ Run the documentation app, which showcases all features of the TileSlider packag
 
 ```shell
 cd docs
-yarn
-yarn start
+pnpm install
+pnpm start
 ```
 
 You can use the `--host 0.0.0.0` argument to make the dev server available on your local network:
 
 ```shell
-yarn start --host 0.0.0.0
+pnpm start --host 0.0.0.0
 ```

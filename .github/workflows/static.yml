@@ -27,27 +27,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '24'
+          node-version: "24"
+      - name: Install pnpm
+        uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d # v6.0.5
       - name: Install and build TileSlider
         run: |
-          yarn install
-          yarn build
+          pnpm install
+          pnpm build
       - name: Install and build docs
         run: |
-          yarn install
-          yarn build
+          pnpm install
+          pnpm build
         env:
           BASE_URL: /tile-slider/
         working-directory: docs
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           # Upload entire repository
-          path: 'docs/build'
+          path: "docs/build"
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

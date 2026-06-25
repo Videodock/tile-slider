@@ -12,8 +12,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '24'
+          node-version: "24"
+      - name: Install pnpm
+        uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d # v6.0.5
       - name: Install dependencies
-        run: yarn install
+        run: pnpm install
       - name: Lint
-        run: yarn lint
+        run: pnpm lint
