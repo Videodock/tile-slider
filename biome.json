@@ -11,13 +11,14 @@
     "formatWithErrors": false,
     "lineWidth": 140
   },
-  "organizeImports": {
-    "enabled": true
-  },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
+      "complexity": {
+        "noImportantStyles": "off"
+      },
       "style": {
         "noParameterAssign": "off"
       }
@@ -26,7 +27,8 @@
   "javascript": {
     "formatter": {
       "quoteStyle": "single"
-    }
+    },
+    "jsxRuntime": "reactClassic"
   },
   "css": {
     "formatter": {
