@@ -1,8 +1,8 @@
-import React, { type ReactElement, type ForwardedRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, { type ForwardedRef, type ReactElement, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 import { useEventCallback } from './hooks/useEventCallback';
 import { clx } from './utils/clx';
-import { type Position, type TouchMoves, getVelocity, registerMove } from './utils/drag';
+import { getVelocity, type Position, registerMove, type TouchMoves } from './utils/drag';
 import { type AnimationFn, clampWithEasing, easeOut, easeOutQuartic } from './utils/easing';
 import { getCircularIndex } from './utils/math';
 
@@ -180,7 +180,7 @@ export const TileSlider = <T,>({
   const getSliderPosition = useEventCallback(() => {
     const transform = frameRef.current ? getComputedStyle(frameRef.current).transform?.split(', ')[4] : '0';
 
-    return transform ? Number.parseInt(transform) : 0;
+    return transform ? Number.parseInt(transform, 10) : 0;
   });
 
   /**
@@ -468,17 +468,13 @@ export const TileSlider = <T,>({
     [cycleMode, items.length, slideToIndex, state.index, stepCount, tilesToShow],
   );
 
-  useImperativeHandle(
-    sliderRef,
-    () => {
-      return {
-        slide,
-        slideToPage,
-        slideToIndex,
-      };
-    },
-    [slide, slideToIndex, slideToPage],
-  );
+  useImperativeHandle(sliderRef, () => {
+    return {
+      slide,
+      slideToPage,
+      slideToIndex,
+    };
+  }, [slide, slideToIndex, slideToPage]);
 
   const handleTouchStart = useEventCallback((event: TouchEvent): void => {
     sliderDataRef.current.origin = {

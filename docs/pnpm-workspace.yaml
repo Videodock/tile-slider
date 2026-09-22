@@ -3,3 +3,4 @@ allowBuilds:
 minimumReleaseAge: 10080
 overrides:
   "serialize-javascript": "^7.0.3"
+  "sockjs>uuid": "^11.1.1"
