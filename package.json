@@ -19,6 +19,7 @@
     "format": "biome check --write",
     "lint": "biome lint",
     "lint:fix": "biome lint --write",
+    "typecheck": "tsc --noEmit",
     "version": "conventional-changelog -p angular -i CHANGELOG.md -o CHANGELOG.md && git add CHANGELOG.md && node ./scripts/gh-release.mjs"
   },
   "devDependencies": {
