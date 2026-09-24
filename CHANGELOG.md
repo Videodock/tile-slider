@@ -1,3 +1,5 @@
+## [2.3.11](https://github.com/Videodock/tile-slider/compare/v2.3.10...v2.3.11) (2026-09-24)
+
 ## [2.3.10](https://github.com/Videodock/tile-slider/compare/v2.3.9...v2.3.10) (2026-07-01)
 
 ## [2.3.9](https://github.com/Videodock/tile-slider/compare/v2.3.8...v2.3.9) (2026-06-29)
