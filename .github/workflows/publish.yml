@@ -23,10 +23,7 @@ jobs:
           scope: "@videodock"
       - name: Install pnpm
         uses: pnpm/action-setup@8912a9102ac27614460f54aedde9e1e7f9aec20d # v6.0.5
-      # Ensure npm 11.5.1 or later is installed for publishing with trusted publisher (OIDC)
-      - name: Update npm
-        run: pnpm install -g npm@latest
       - name: Install dependencies
         run: pnpm install
       - name: Publish to NPM
-        run: npm publish --access public
+        run: pnpm publish --access public
